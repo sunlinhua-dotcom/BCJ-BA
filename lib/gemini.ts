@@ -1,12 +1,12 @@
 /**
  * 佰草集修源五行 - Gemini API 集成
- * 使用 APIYI 代理调用 Gemini 模型（与MI70逻辑一致）
+ * 使用 APIYI 代理调用 Gemini 模型
  */
 
-const API_KEY = 'sk-g8JehwXjfoWKeHxvDdAe2277FeA24c0094B7E6Fe5566346b'
-const IMAGE_MODEL = 'gemini-3-pro-image-preview'
-const TEXT_MODEL = 'gemini-3-pro-image-preview'
-const BASE_URL = 'https://api.apiyi.com/v1beta'
+const API_KEY = process.env.GEMINI_API_KEY || 'sk-g8JehwXjfoWKeHxvDdAe2277FeA24c0094B7E6Fe5566346b'
+const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-3-pro-image-preview'
+const TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-3-pro-image-preview'
+const BASE_URL = process.env.GEMINI_BASE_URL || 'https://api.apiyi.com/v1beta'
 
 /**
  * 生成产品合成图片

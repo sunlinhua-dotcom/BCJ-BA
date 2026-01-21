@@ -1,65 +1,250 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import Header from '@/components/Header'
+import { ProductSelector } from '@/components/ProductSelector'
+import { PRODUCTS } from '@/lib/constants'
+import { EnvironmentUploader } from '@/components/EnvironmentUploader'
+import { Sparkles, Loader2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { compressImage } from '@/lib/client-compression'
+
+export default function HomePage() {
+  const router = useRouter()
+  const [selectedProduct, setSelectedProduct] = useState<string | null>(null)
+  const [envFile, setEnvFile] = useState<File | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [progress, setProgress] = useState('')
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Avoid hydration mismatch by only rendering after mount
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  const canSubmit = selectedProduct && envFile && !isSubmitting
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return
+
+    setIsSubmitting(true)
+    setProgress('正在压缩图片...')
+
+    try {
+      // 客户端压缩环境图（与MI70一致）
+      const compressedEnv = await compressImage(envFile, 1200, 0.8)
+
+      setProgress('正在上传至服务器...')
+
+      const formData = new FormData()
+      formData.append('productId', selectedProduct)
+      formData.append('envFile', compressedEnv)
+
+      setProgress('AI正在创作中...')
+
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || '生成失败')
+      }
+
+      // 存储结果到 sessionStorage 并跳转
+      sessionStorage.setItem('herborist_result', JSON.stringify({
+        imageData: data.imageData,
+        copyTexts: data.copyTexts, // { styleA, styleB, styleC }
+        productName: data.productName
+      }))
+
+      router.push('/result')
+
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '生成失败'
+      console.error('Submit error:', errorMessage)
+
+      // 友好的错误提示
+      let userMessage = errorMessage
+      if (errorMessage.includes('503')) {
+        userMessage = 'AI 服务繁忙，请稍后再试（503）'
+      } else if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
+        userMessage = '请求超时，请检查网络后重试'
+      } else if (errorMessage.includes('Failed to fetch')) {
+        userMessage = '网络连接失败，请检查网络'
+      }
+
+      alert(userMessage)
+    } finally {
+      setIsSubmitting(false)
+      setProgress('')
+    }
+  }
+
+  const selectedProductInfo = PRODUCTS.find(p => p.id === selectedProduct)
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen bg-[#F8F6F3]">
+      {/* 顶级质感：模拟宣纸/磨砂颗粒纹理 */}
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.035] mix-blend-multiply"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
+        }}
+      />
+
+      {/* 柔和环境光 - 顶部暖光 */}
+      <div className="fixed top-[-20%] left-[-10%] w-[120%] h-[60%] bg-[radial-gradient(ellipse_at_center,rgba(255,253,250,1)_0%,rgba(240,238,233,0)_70%)] z-0 pointer-events-none opacity-60" />
+
+      {/* 底部氛围光 */}
+      <div className="fixed bottom-0 left-0 w-full h-48 bg-gradient-to-t from-[#F0ECE6] via-[#F8F6F3]/50 to-transparent z-0 pointer-events-none" />
+
+      {/* Header (Relative to stay above background) */}
+      <div className="relative z-10">
+        <Header />
+      </div>
+
+      {/* Main Content */}
+      <main className="relative z-10 pb-32 space-y-8">
+        {/* Product Selector */}
+        <section>
+          <ProductSelector
+            selectedProduct={selectedProduct}
+            onSelect={setSelectedProduct}
+          />
+        </section>
+
+        {/* Environment Uploader */}
+        <section>
+          <EnvironmentUploader
+            file={envFile}
+            onFileChange={setEnvFile}
+          />
+        </section>
+
+        {/* Selected Product Info */}
+        {selectedProductInfo && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mx-4 p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-[#4A6B50]/10"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+            <p className="text-xs text-[#8B7355] mb-1">已选择</p>
+            <p className="text-base font-semibold text-[#4A6B50]">
+              {selectedProductInfo.name} · {selectedProductInfo.sub}
+            </p>
+            <p className="text-sm text-gray-500 mt-1">
+              {selectedProductInfo.description}
+            </p>
+          </motion.div>
+        )}
       </main>
+
+      {/* Fixed Submit Button */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-[#F8F6F3] via-[#F8F6F3] to-transparent pt-8">
+        <button
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+          className={`
+                        w-full h-14 rounded-full flex items-center justify-center gap-2
+                        font-semibold text-base transition-all duration-300
+                        ${canSubmit
+              ? 'bg-gradient-to-r from-[#4A6B50] to-[#3D5A43] text-white shadow-lg shadow-[#4A6B50]/30 active:scale-[0.98]'
+              : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
+                    `}
+        >
+          {/* Prevent Hydration Mismatch: Only render dynamic text on client */}
+          {!isMounted ? (
+            <div className="flex items-center gap-2">
+              <Sparkles size={20} className="text-gray-400" />
+              <span>Loading...</span>
+            </div>
+          ) : isSubmitting ? (
+            <>
+              <Loader2 size={20} className="animate-spin" />
+              <span>{progress || '处理中...'}</span>
+            </>
+          ) : (
+            <>
+              {canSubmit ? (
+                <>
+                  <Sparkles size={20} />
+                  <span>生成合成图片</span>
+                </>
+              ) : (
+                <span>
+                  {!selectedProduct ? '请先选择产品' : !envFile ? '请上传环境图' : '准备就绪'}
+                </span>
+              )}
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Loading Overlay */}
+      <AnimatePresence>
+        {isSubmitting && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center px-8"
+          >
+            {/* Animated Brand Loading */}
+            <div className="flex flex-col items-center justify-center">
+              <div className="relative w-24 h-24 mb-6">
+                <motion.div
+                  animate={{
+                    scale: [1, 1.1, 1],
+                    opacity: [0.5, 1, 0.5]
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="w-full h-full relative"
+                >
+                  <Image
+                    src="/logo-new.png"
+                    alt="Loading"
+                    fill
+                    unoptimized
+                    className="object-contain"
+                  />
+                </motion.div>
+                {/* 装饰圆环 */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-[-20%] border border-herb-gold/20 rounded-full border-dashed"
+                />
+              </div>
+
+              <h2 className="text-xl font-serif text-white tracking-widest mb-2">
+                正在凝练东方美学
+              </h2>
+              <p className="text-herb-accent/80 text-xs tracking-wider mb-8 uppercase font-light">
+                {progress || 'AI Generating...'}
+              </p>
+
+              <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-6 py-2 flex items-center gap-3">
+                <div className="flex gap-1">
+                  <motion.div animate={{ height: [4, 12, 4] }} transition={{ duration: 1, repeat: Infinity, delay: 0 }} className="w-1 bg-herb-gold rounded-full" />
+                  <motion.div animate={{ height: [4, 12, 4] }} transition={{ duration: 1, repeat: Infinity, delay: 0.2 }} className="w-1 bg-herb-gold rounded-full" />
+                  <motion.div animate={{ height: [4, 12, 4] }} transition={{ duration: 1, repeat: Infinity, delay: 0.4 }} className="w-1 bg-herb-gold rounded-full" />
+                </div>
+                <span className="text-xs text-white/60 font-light pl-2 border-l border-white/10">
+                  请耐心等待创作
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
-  );
+  )
 }

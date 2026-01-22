@@ -22,17 +22,25 @@ export async function generateProductImage(
     envBase64: string,
     productName: string
 ): Promise<string> {
-    console.log('[Gemini] Starting product image generation for:', productName)
-    console.log('[Gemini] API Key exists:', !!API_KEY)
+    // 产品真实尺寸信息
+    const productSizes: Record<string, string> = {
+        '仙草霜': '50ml cream jar, approximately 4.5-5cm tall, wide and short shape',
+        '仙草露': '120ml toner bottle, approximately 13-15cm tall, slender cylindrical shape',
+        '仙草油': '30ml oil bottle, approximately 8-10cm tall, small elegant bottle',
+        '仙草乳': '100ml lotion bottle, approximately 13-15cm tall, medium pump bottle'
+    }
+
+    const sizeInfo = productSizes[productName] || '100ml bottle, approximately 13-15cm tall'
 
     // 专业摄影师级别的提示词
     const prompt = `You are a MASTER COMMERCIAL PHOTOGRAPHER creating a premium skincare product image.
 
 BRAND: 佰草集 HERBORIST - ${productName}
+PRODUCT SIZE: ${sizeInfo}
 
 INPUT IMAGES:
 - IMAGE 1: Brand LOGO
-- IMAGE 2: Product bottle
+- IMAGE 2: Product bottle (${sizeInfo})
 - IMAGE 3: Environment scene (your shooting location)
 
 ═══════════════════════════════════════════════════
@@ -54,11 +62,17 @@ STEP 2: INTELLIGENT COMPOSITION
 STEP 3: PRODUCT PLACEMENT (CRITICAL - MUST BE REALISTIC)
 - Place product bottle from IMAGE 2 STANDING ON the chosen surface
 - Product MUST have a contact point with the surface (not floating!)
+- **SCALE ACCURACY**: Product size must match its real dimensions (${sizeInfo})
+  * If it's a 5cm tall jar, it should look small and compact
+  * If it's a 15cm tall bottle, it should appear taller and more slender
+  * Compare to typical objects: a 5cm jar is about the size of a golf ball in height
+  * A 15cm bottle is roughly the length of a smartphone
 - Cast a NATURAL CONTACT SHADOW beneath the product
 - Product material (ceramic/glass bottle) must show:
   * Realistic highlights from the light source
   * Subtle reflections of environment colors
   * Proper texture and gloss
+  * Bottle should look SOLID and three-dimensional, not flat
 
 STEP 4: FIVE SACRED HERBS ARRANGEMENT
 Place these herbs NATURALLY ON THE SURFACE around the product:

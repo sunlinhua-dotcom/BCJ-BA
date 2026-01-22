@@ -56,8 +56,8 @@ The product bottle in IMAGE 2 MUST be reproduced with EXACT accuracy:
 - Cap/lid design must match EXACTLY
 - DO NOT alter, redesign, or "improve" the product appearance
 - Treat IMAGE 1 as a sacred reference - copy the bottle faithfully
-- **ABSOLUTELY NO TEXT OR LOGOS**: The entire image (background, surface, overlay) must be 100% free of text, letters, characters, logos, or watermarks.
-- **CLEAN BACKGROUND**: Do not add any "Herborist" text or Chinese characters to the background.
+- **NO FLOATING TEXT**: Do not add random text, watermarks, or logos to the background or corners.
+- **PROTECT PRODUCT LABEL**: The text/logo ON THE BOTTLE itself (from IMAGE 1) MUST BE PRESERVED. Do not erase the product branding.
 
 ═══════════════════════════════════════════════════
 YOUR TASK: CREATE A PROFESSIONAL PRODUCT PHOTOGRAPH
@@ -98,8 +98,8 @@ STEP 6: DEPTH OF FIELD
 Product and herbs: SHARP. Background: naturally BLURRED (f/2.8-f/4).
 
 STEP 7: CLEAN OUTPUT
-- FINAL CHECK: Ensure there is ZERO text, NO logos, and NO watermarks in the final image. We will add the logo programmatically.
-
+- Ensure no *extra* text is added to the background.
+- Ensure the product label text is visible and sharp.
 OUTPUT: 1:1 ratio photorealistic product image.`
 
         : `You are a MASTER COMMERCIAL PHOTOGRAPHER creating a premium skincare product image with a DREAMY BACKGROUND.
@@ -119,8 +119,8 @@ The product bottle in IMAGE 1 MUST be reproduced with EXACT accuracy:
 - Color scheme must be PRECISE
 - Cap/lid design must match EXACTLY
 - DO NOT alter, redesign, or "improve" the product appearance
-- **ABSOLUTELY NO TEXT OR LOGOS**: The entire image must be 100% free of text, letters, characters, logos, or watermarks.
-- **CLEAN BACKGROUND**: Do not add any "Herborist" text or Chinese characters.
+- **NO FLOATING TEXT**: Do not add random text, watermarks, or logos to the background or corners.
+- **PROTECT PRODUCT LABEL**: The text/logo ON THE BOTTLE itself (from IMAGE 1) MUST BE PRESERVED. Do not erase the product branding.
 
 ═══════════════════════════════════════════════════
 YOUR TASK: CREATE BACKGROUND + PRODUCT IMAGE
@@ -162,8 +162,8 @@ STEP 5: DEPTH OF FIELD
 Product and herbs: SHARP FOCUS. Background: naturally BLURRED.
 
 STEP 6: CLEAN OUTPUT
-- FINAL CHECK: Ensure there is ZERO text, NO logos, and NO watermarks.
-
+- Ensure no *extra* text is added to the background.
+- Ensure the product label text is visible and sharp.
 OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.`
 
     // const cleanLogoBase64 = logoBase64.replace(/^data:image\/\w+;base64,/, '') (Unused)

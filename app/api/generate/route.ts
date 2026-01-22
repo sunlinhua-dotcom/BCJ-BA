@@ -27,20 +27,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "无效的产品选择" }, { status: 400 })
         }
 
-        // 1. 准备 Logo Buffer (用于后续合成)
-        const logoPath = path.join(process.cwd(), 'public', 'logo.png')
-        let compositionLogoBuffer: Buffer
-        try {
-            const rawLogoBuffer = fs.readFileSync(logoPath)
-            // 调整 Logo 大小供合成使用 (宽 450px，约占生成的 1024 图的一半宽度)
-            compositionLogoBuffer = await sharp(rawLogoBuffer)
-                .resize(450, null) // 自适应高度
-                .toBuffer()
-            console.log('[API] Logo prepared for composition')
-        } catch (e) {
-            console.error('[API] Failed to load logo:', e)
-            throw new Error('服务器缺少 Logo 文件')
-        }
+
 
         // 2. 准备产品图片 (AI 参考图)
         const productImagePath = path.join(process.cwd(), 'public', 'products-ai', `${productId}.png`)
@@ -79,27 +66,16 @@ export async function POST(req: Request) {
 
         console.log('[API] Starting parallel generation...')
 
-        // 4. 并行生成：图片（含 LOGO） + 文案
-        // 注意：generateProductImage 不再负责生成 Logo，传入空字符串也没关系，但为了类型匹配传入 compositionLogoBuffer 的 base64
+        // 4. 并行生成：图片（纯净无Logo） + 文案
+        // generateProductImage 第一个参数现在传空字符串，因为不再需要 Logo
         const [rawImageBase64, copyResult] = await Promise.all([
-            generateProductImage(compositionLogoBuffer.toString('base64'), productBase64, envBase64, product.name),
+            generateProductImage('', productBase64, envBase64, product.name),
             generateUGCCopy(product.name)
         ])
 
-        // 5. 后处理：合成 Logo (Server-side Composition)
-        console.log('[API] Compositing Logo onto AI image...')
-        const rawImageBuffer = Buffer.from(rawImageBase64, 'base64')
-        const finalImageBuffer = await sharp(rawImageBuffer)
-            .composite([{
-                input: compositionLogoBuffer,
-                top: 50,  // 距离顶部像素
-                left: 50, // 距离左侧像素
-                // blend: 'over' // 默认覆盖
-            }])
-            .jpeg({ quality: 90 }) // 输出高质量 JPEG
-            .toBuffer()
-
-        const finalImageBase64 = finalImageBuffer.toString('base64')
+        // 5. 不再合成 Logo，直接使用 AI 生成的纯净图
+        console.log('[API] Using clean AI image (No Logo)...')
+        const finalImageBase64 = rawImageBase64
         // 6. 记录生成日志
         try {
             const record = {

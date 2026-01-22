@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import Header from '@/components/Header'
 import { ProductSelector } from '@/components/ProductSelector'
 import { PRODUCTS } from '@/lib/constants'
@@ -224,7 +223,7 @@ export default function HomePage() {
 
       {/* Loading Overlay - 本草灵签版 */}
       <AnimatePresence>
-        {isSubmitting && <FortuneLoading />}
+        {isSubmitting && <FortuneLoading externalProgress={realProgress} />}
       </AnimatePresence>
     </div>
   )

@@ -32,9 +32,9 @@ export async function POST(req: Request) {
         let compositionLogoBuffer: Buffer
         try {
             const rawLogoBuffer = fs.readFileSync(logoPath)
-            // 调整 Logo 大小供合成使用 (宽 180px，适合 1024x1024 图片)
+            // 调整 Logo 大小供合成使用 (宽 450px，约占生成的 1024 图的一半宽度)
             compositionLogoBuffer = await sharp(rawLogoBuffer)
-                .resize(180, null) // 自适应高度
+                .resize(450, null) // 自适应高度
                 .toBuffer()
             console.log('[API] Logo prepared for composition')
         } catch (e) {
@@ -92,8 +92,8 @@ export async function POST(req: Request) {
         const finalImageBuffer = await sharp(rawImageBuffer)
             .composite([{
                 input: compositionLogoBuffer,
-                top: 40,  // 距离顶部像素
-                left: 40, // 距离左侧像素
+                top: 50,  // 距离顶部像素
+                left: 50, // 距离左侧像素
                 // blend: 'over' // 默认覆盖
             }])
             .jpeg({ quality: 90 }) // 输出高质量 JPEG

@@ -25,7 +25,7 @@ export async function generateProductImage(
     console.log('[Gemini] Starting product image generation for:', productName)
     console.log('[Gemini] API Key exists:', !!API_KEY)
 
-    // 米其林美食摆盘风格提示词
+    // 米其林美食摆盘风格提示词 - 自然摆放
     const prompt = `You are a world-class commercial photographer creating a LUXURIOUS skincare product image.
 
 BRAND: 佰草集 HERBORIST - ${productName}
@@ -39,47 +39,45 @@ INPUT IMAGES:
 CREATE A MICHELIN-STAR FOOD PHOTOGRAPHY STYLE IMAGE
 ═══════════════════════════════════════════════════
 
-COMPOSITION REQUIREMENTS:
+COMPOSITION - Like a high-end product still life:
 
-1. 【BACKGROUND】
-   - Use IMAGE 3 as the REAL environment background
-   - Keep the environment authentic and slightly soft/blurred
-   - The scene should feel like a luxury spa, tea house, or fine dining setting
+1. 【ENVIRONMENT】
+   - Use IMAGE 3 as the REAL background scene
+   - Find the best surface/table/spot in the scene
+   - Slightly soft focus for depth, but keep it realistic
 
-2. 【PRODUCT PLACEMENT】
-   - Place the product bottle from IMAGE 2 in the CENTER of the image
-   - Product is the HERO - large, sharp, prominent
-   - Product should look REALISTICALLY placed in the environment
-   - Match lighting and shadows with the environment
+2. 【PRODUCT - CENTER HERO】
+   - Place product bottle from IMAGE 2 in the CENTER
+   - Product is sharp, prominent, beautifully lit
+   - Realistic shadows and reflections matching the scene
 
-3. 【FIVE SACRED HERBS - ARTISTIC ARRANGEMENT】
-   Place these 5 elements AROUND the product like Michelin food plating:
+3. 【FIVE SACRED HERBS - NATURAL ARRANGEMENT】
+   Arrange these herbs DIRECTLY on the surface around the product,
+   like a chef plating a Michelin dish - NO bubbles, completely natural:
    
-   Each herb should be enclosed in an elegant TRANSPARENT SPHERE/BUBBLE:
-   - 长白山人参 (Ginseng root with tendrils) - bottom left area
-   - 灵芝 (Whole Lingzhi mushroom cap) - top right area
-   - 牡丹花瓣与籽 (Peony petals and seeds) - left side
-   - 紫苏叶 (Purple Perilla leaves) - right side  
-   - 北五味子 (Red Schisandra berry clusters) - bottom right area
+   - 长白山人参 (Fresh ginseng root with tendrils) - laid naturally on one side
+   - 灵芝 (Whole Lingzhi mushroom) - placed elegantly nearby
+   - 牡丹花瓣 (Scattered peony petals) - delicately around the base
+   - 紫苏叶 (Fresh purple perilla leaves) - artistically placed
+   - 北五味子 (Red schisandra berries) - small cluster on the surface
    
-   These transparent spheres should:
-   - Float elegantly around the product
-   - Have subtle light reflections for glass/bubble effect
-   - Be evenly spaced for visual balance
-   - Not overlap with the product
+   These elements should:
+   - Look REAL and touchable, not CGI
+   - Cast natural shadows on the surface
+   - Be arranged with artistic balance but look effortless
+   - Complement the product without competing with it
 
 4. 【LOGO】
-   - Place the LOGO from IMAGE 1 in the TOP LEFT corner
-   - Size: 15-20% of image width
-   - Clear and visible but not overpowering
+   - LOGO from IMAGE 1 in TOP LEFT corner
+   - 15-20% width, clear but subtle
 
 5. 【STYLE】
-   - Premium editorial photography
-   - Warm, luxurious lighting
-   - Oriental zen meets modern luxury
-   - Like a beauty magazine cover shot
+   - Premium food/product photography
+   - Natural, warm lighting
+   - Editorial beauty magazine quality
+   - Oriental elegance meets modern luxury
 
-OUTPUT: 1:1 ratio premium product poster with product centered, 5 herbs in transparent bubbles arranged artistically around it, LOGO in top left, all SET IN the environment background.`
+OUTPUT: 1:1 product poster - product centered with 5 herbs naturally arranged around it like Michelin food plating, LOGO top left, all realistically set in the environment.`
 
     const cleanLogoBase64 = logoBase64.replace(/^data:image\/\w+;base64,/, '')
     const cleanProductBase64 = productBase64.replace(/^data:image\/\w+;base64,/, '')

@@ -43,9 +43,8 @@ BRAND: 佰草集 HERBORIST - ${productName}
 PRODUCT SIZE: ${sizeInfo}
 
 INPUT IMAGES:
-- IMAGE 1: Brand LOGO
-- IMAGE 2: Product bottle (${sizeInfo}) - MUST BE REPRODUCED EXACTLY
-- IMAGE 3: Environment scene (your shooting location)
+- IMAGE 1: Product bottle (${sizeInfo}) - MUST BE REPRODUCED EXACTLY
+- IMAGE 2: Environment scene (your shooting location)
 
 ═══════════════════════════════════════════════════
 ⚠️ CRITICAL: PRODUCT ACCURACY
@@ -56,13 +55,14 @@ The product bottle in IMAGE 2 MUST be reproduced with EXACT accuracy:
 - Color scheme must be PRECISE
 - Cap/lid design must match EXACTLY
 - DO NOT alter, redesign, or "improve" the product appearance
-- Treat IMAGE 2 as a sacred reference - copy it faithfully
+- Treat IMAGE 1 as a sacred reference - copy it faithfully
+- **DO NOT** add any text, logos, or watermarks. The image should be clean.
 
 ═══════════════════════════════════════════════════
 YOUR TASK: CREATE A PROFESSIONAL PRODUCT PHOTOGRAPH
 ═══════════════════════════════════════════════════
 
-STEP 1: ANALYZE THE ENVIRONMENT (IMAGE 3)
+STEP 1: ANALYZE THE ENVIRONMENT (IMAGE 2)
 - What type of scene is this? (tea house, café, natural setting, spa, etc.)
 - Identify the BEST SURFACE to place the product
 - Find the most visually appealing angle and composition
@@ -74,7 +74,7 @@ STEP 2: INTELLIGENT COMPOSITION
 - Background elements naturally BLURRED with depth of field
 
 STEP 3: PRODUCT PLACEMENT
-- Place the EXACT product bottle from IMAGE 2 STANDING ON the surface
+- Place the EXACT product bottle from IMAGE 1 STANDING ON the surface
 - Product MUST have a contact point (not floating!)
 - **SCALE**: Match real dimensions (${sizeInfo})
 - Cast a NATURAL CONTACT SHADOW
@@ -107,18 +107,18 @@ BRAND: 佰草集 HERBORIST - ${productName}
 PRODUCT SIZE: ${sizeInfo}
 
 INPUT IMAGES:
-- IMAGE 1: Brand LOGO  
-- IMAGE 2: Product bottle (${sizeInfo}) - MUST BE REPRODUCED EXACTLY
+- IMAGE 1: Product bottle (${sizeInfo}) - MUST BE REPRODUCED EXACTLY
 
 ═══════════════════════════════════════════════════
 ⚠️ CRITICAL: PRODUCT ACCURACY
 ═══════════════════════════════════════════════════
-The product bottle in IMAGE 2 MUST be reproduced with EXACT accuracy:
+The product bottle in IMAGE 1 MUST be reproduced with EXACT accuracy:
 - Bottle shape, proportions, and silhouette must match EXACTLY
 - Label design, text, and graphics must be IDENTICAL
 - Color scheme must be PRECISE
 - Cap/lid design must match EXACTLY
 - DO NOT alter, redesign, or "improve" the product appearance
+- **DO NOT** add any text, logos, or watermarks.
 
 ═══════════════════════════════════════════════════
 YOUR TASK: CREATE BACKGROUND + PRODUCT IMAGE
@@ -137,7 +137,7 @@ Since no environment photo is provided, CREATE a beautiful background:
 - Include subtle environmental elements (shadows, bokeh, texture)
 
 STEP 2: PLACE THE EXACT PRODUCT
-- Place the EXACT product from IMAGE 2 on the surface
+- Place the EXACT product from IMAGE 1 on the surface
 - Product MUST have contact with surface (not floating!)
 - **SCALE**: Match real dimensions (${sizeInfo})
 - Cast a NATURAL CONTACT SHADOW
@@ -164,7 +164,7 @@ Place LOGO from IMAGE 1 in TOP LEFT corner, 15-20% width.
 
 OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.`
 
-    const cleanLogoBase64 = logoBase64.replace(/^data:image\/\w+;base64,/, '')
+    // const cleanLogoBase64 = logoBase64.replace(/^data:image\/\w+;base64,/, '') (Unused)
     const cleanProductBase64 = productBase64.replace(/^data:image\/\w+;base64,/, '')
     const cleanEnvBase64 = hasEnvironment ? envBase64.replace(/^data:image\/\w+;base64,/, '') : ''
 
@@ -192,7 +192,7 @@ OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.
                     contents: [{
                         parts: [
                             { text: prompt },
-                            { inline_data: { mime_type: "image/png", data: cleanLogoBase64 } },
+                            { text: prompt },
                             { inline_data: { mime_type: "image/jpeg", data: cleanProductBase64 } },
                             ...(hasEnvironment ? [{ inline_data: { mime_type: "image/jpeg", data: cleanEnvBase64 } }] : [])
                         ]

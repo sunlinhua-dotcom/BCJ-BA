@@ -25,26 +25,24 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "无效的产品选择" }, { status: 400 })
         }
 
-        // 读取品牌 LOGO 并压缩 (使用新的 logo.png)
+        // 1. 准备 Logo Buffer (用于后续合成)
         const logoPath = path.join(process.cwd(), 'public', 'logo.png')
-        let logoBase64: string
+        let compositionLogoBuffer: Buffer
         try {
-            const logoBuffer = fs.readFileSync(logoPath)
-            const compressedLogo = await sharp(logoBuffer)
-                .resize(300, 300, { fit: 'inside', withoutEnlargement: true })
-                .png({ quality: 70 })
+            const rawLogoBuffer = fs.readFileSync(logoPath)
+            // 调整 Logo 大小供合成使用 (宽 180px，适合 1024x1024 图片)
+            compositionLogoBuffer = await sharp(rawLogoBuffer)
+                .resize(180, null) // 自适应高度
                 .toBuffer()
-            logoBase64 = compressedLogo.toString('base64')
-            console.log('[API] Logo compressed:', (compressedLogo.length / 1024).toFixed(0), 'KB')
+            console.log('[API] Logo prepared for composition')
         } catch (e) {
             console.error('[API] Failed to load logo:', e)
             throw new Error('服务器缺少 Logo 文件')
         }
 
-        // 读取产品图片（AI 专用参考图，与页面展示图分开）
+        // 2. 准备产品图片 (AI 参考图)
         const productImagePath = path.join(process.cwd(), 'public', 'products-ai', `${productId}.png`)
         const productBuffer = fs.readFileSync(productImagePath)
-        console.log('[API] Product AI reference image loaded:', productId)
         let processedProductBuffer: Buffer
         try {
             processedProductBuffer = await sharp(productBuffer)
@@ -56,9 +54,8 @@ export async function POST(req: Request) {
             processedProductBuffer = productBuffer
         }
         const productBase64 = processedProductBuffer.toString('base64')
-        console.log('[API] Product compressed:', (processedProductBuffer.length / 1024).toFixed(0), 'KB')
 
-        // 处理环境图 (如果存在)
+        // 3. 处理环境图 (如果存在)
         let envBase64: string | undefined
         if (envFile) {
             const envBuffer = Buffer.from(await envFile.arrayBuffer())
@@ -72,28 +69,41 @@ export async function POST(req: Request) {
                 console.log('[API] Env compressed:', (processedEnvBuffer.length / 1024).toFixed(0), 'KB')
             } catch (e) {
                 console.warn('[API] Env compression failed:', e)
-                // fallback to raw buffer if compression fails
                 envBase64 = envBuffer.toString('base64')
             }
         } else {
             console.log('[API] No environment file provided, will generate background')
         }
 
+        console.log('[API] Starting parallel generation...')
 
-        console.log('[API] Images compressed, starting parallel generation...')
-
-        // 并行生成：图片（含 LOGO） + 文案
-        const [imageResult, copyResult] = await Promise.all([
-            generateProductImage(logoBase64, productBase64, envBase64, product.name),
+        // 4. 并行生成：图片（含 LOGO） + 文案
+        // 注意：generateProductImage 不再负责生成 Logo，传入空字符串也没关系，但为了类型匹配传入 compositionLogoBuffer 的 base64
+        const [rawImageBase64, copyResult] = await Promise.all([
+            generateProductImage(compositionLogoBuffer.toString('base64'), productBase64, envBase64, product.name),
             generateUGCCopy(product.name)
         ])
 
-        console.log('[API] Generation complete!')
+        // 5. 后处理：合成 Logo (Server-side Composition)
+        console.log('[API] Compositing Logo onto AI image...')
+        const rawImageBuffer = Buffer.from(rawImageBase64, 'base64')
+        const finalImageBuffer = await sharp(rawImageBuffer)
+            .composite([{
+                input: compositionLogoBuffer,
+                top: 40,  // 距离顶部像素
+                left: 40, // 距离左侧像素
+                // blend: 'over' // 默认覆盖
+            }])
+            .jpeg({ quality: 90 }) // 输出高质量 JPEG
+            .toBuffer()
+
+        const finalImageBase64 = finalImageBuffer.toString('base64')
+        console.log('[API] Generation & Composition complete!')
 
         return NextResponse.json({
             success: true,
-            imageData: imageResult,
-            copyTexts: copyResult, // { styleA, styleB, styleC }
+            imageData: finalImageBase64,
+            copyTexts: copyResult,
             productName: product.name
         })
 

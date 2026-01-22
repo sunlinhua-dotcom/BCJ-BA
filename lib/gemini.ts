@@ -260,8 +260,13 @@ OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.
     throw lastError || new Error("Failed to generate image after retries")
 }
 
+// 随机辅助函数
+function getRandomItem<T>(arr: T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)]
+}
+
 /**
- * 生成UGC种草文案 - 三种风格
+ * 生成UGC种草文案 - 三种风格 (千人千面版)
  */
 export async function generateUGCCopy(productName: string): Promise<{
     styleA: string;
@@ -270,45 +275,60 @@ export async function generateUGCCopy(productName: string): Promise<{
 }> {
     console.log('[Gemini] Generating 3-style UGC copy for:', productName)
 
-    const prompts = {
-        styleA: `你是一位30+的都市大女主，某领域的高管或独立创作者。你清醒、理智、挑剔，从不跟风，只选真正有"秩序感"的好东西。请写一段关于佰草集修源五行【${productName}】的私房话。
+    // 随机因子
+    const times = ['深夜加班后', '清晨醒来', '周末独处', '出差途中', '重要约会前']
+    const moods = ['疲惫求安慰', '充满期待', '从容淡定', '略带焦虑', '极度自律']
+    const randomContext = `场景设定：${getRandomItem(times)}，心情：${getRandomItem(moods)}。`
 
+    // Style A: 都市大女主 / 独立女性 / 职场精英 (多种微人设)
+    const styleAPersonas = [
+        `你是一位35+的外企高管，见过大世面，不仅买得起大牌，更懂得"鉴赏"。你反感制造焦虑，只信奉"长期主义"和"掌控感"。`,
+        `你是一位独立的知名时尚博主，不是那种随波逐流的网红，而是有思想的意见领袖。你认为护肤是"自我投资"的一部分。`,
+        `你是一位创业公司女CEO，每天都在打仗。你需要的不是"安慰剂"，而是能给你"底气"的战友。`
+    ]
+    const promptStyleA = `${getRandomItem(styleAPersonas)}
+${randomContext}
+请写一段关于佰草集修源五行【${productName}】的私房话。
 要求：
-- **拒绝焦虑**：不要写"熬夜脸"、"急救"，要写"重建秩序"、"掌控感"、"长期主义"。
-- **独特视角**：把护肤上升到"自我对话"的高度。例如："到了这个年纪，护肤不是为了迎合审美，而是为了确认自我。"
-- **犀利点评**：不用堆砌成分，而是讲"支撑力"、"底气"。提到五大仙草（人参、灵芝等）时，要说它们带来了"稳"。
-- **顶级种草**：语气克制但笃定，像在私人Club里低声告诉最好的朋友："试过无数大牌，最后留住我的是它。"
-- **金句频出**：每三句要有一个让人想截图的金句。保留"内养生机""年轻嘭弹"但要融化在观点里。
-- 280-320字，直接输出文案。`,
+- **拒绝焦虑词汇**：不要用"急救"、"烂脸"这种低级词，要用"重塑秩序"、"内在支撑"、"回血"。
+- **独特金句**：把护肤上升到人生哲学。例如："成年人的安全感，一半来自存款，一半来自皮肤的'稳'。"
+- **克制的高级感**：像在顶级私人Club里低声告诉闺蜜，不要像大卖场叫卖。
+- **280字左右**，直接输出文案。`
 
-        styleB: `你是一位隐居在现代都市的生活艺术家，追求极致的感官体验和东方雅趣。请为佰草集修源五行【${productName}】写一篇关于"呼吸"与"静"的生活美学随笔。
-
+    // Style B: 东方美学 / 隐士 / 生活艺术家 (多种微人设)
+    const styleBPersonas = [
+        `你是一位隐居在现代都市的茶道师，对气味和质地极其敏感。你认为护肤是一场"五感的修行"。`,
+        `你是一位古风摄影师，善于发现光影和意境之美。你眼中的护肤品，是大自然能量（草本）的具象化。`,
+        `你是一位追求极简生活的作家，讨厌繁复的堆砌，只喜欢"刚刚好"的滋养。`
+    ]
+    const promptStyleB = `${getRandomItem(styleBPersonas)}
+${randomContext}
+请写一篇关于佰草集修源五行【${productName}】的生活美学随笔。
 要求：
-- **五感沉浸**：极致描写气味（草本的苦与甘）、质地（如玉、如云）、触感（温润）。
-- **仪式感**：描述涂抹的过程像通过一场茶道或冥想，强调慢下来的奢侈。
-- **意境营造**：不要掉书袋引古文，要写出"空灵感"和"留白"。例如："在万物速朽的时代，寻找一种恒常。"
-- **东方奢华**：把五大仙草写成大自然的馈赠，是天地能量的各种形态（人参的力、牡丹的媚、紫苏的洁）。
-- **精神共鸣**：将"内养生机"升华为内心的充盈和宁静。
-- 280-320字，文字要有香气，直接输出文案。`,
+- **通感描写**：着重描写草本的香气（苦后回甘）、质地的触感（温润如玉）。
+- **意境**：不要掉书袋，要写出"空灵"和"留白"。把五大仙草写成天地的馈赠。
+- **情绪价值**：护肤是为了"静心"，是在浮躁世界里找回"内在的平衡"。
+- **280字左右**，文字要有香气，直接输出文案。`
 
-        styleC: `你是皮肤科学研究者，对传统中医与现代科学结合有深入研究。为佰草集修源五行【${productName}】写一篇专业但易懂的科普分析。
-
+    // Style C: 懂成分的闺蜜 / 智慧护肤导师 (去晦涩化)
+    // 痛点优化：不再是死板的研究员，而是能把复杂道理讲得简单的"聪明闺蜜"
+    const styleCPersonas = [
+        `你是一位拥有百万粉丝的"成分党"博主，最擅长把晦涩的论文讲成"人话"。`,
+        `你是一位资深配方师，但你痛恨把护肤品说成化学实验。你喜欢打比方，让小白也能听懂。`
+    ]
+    const promptStyleC = `${getRandomItem(styleCPersonas)}
+请写一篇关于佰草集修源五行【${productName}】的深度科普，但要**完全听得懂**。
 要求：
-- 从现代皮肤科学角度解读中草药成分（引用学术研究）
-- 阐述五大仙草的分子机制（如：人参皂苷Rb1促进成纤维细胞增殖）
-- 分析"内养生机"的科学原理（肌底代谢、细胞更新周期）
-- 用专业术语但解释清楚，展现深厚知识功底
-- 批判性思考，既肯定价值也指出局限
-- 从循证医学角度给出客观评价
-- 280-320字，专业严谨但不枯燥，直接输出文案`
-    }
+- **讲人话**：不要堆砌"成纤维细胞"、"信号通路"这种词，除非你能立马解释。
+- **善用比喻**：把"修护屏障"比作"修城墙"，把"五大仙草"比作"给细胞喂的高级补品"。
+- **逻辑清晰**：先说**结果**（脸稳了、亮了），再说**原因**（因为人参给了能量，灵芝安抚了情绪）。
+- **客观**：既要专业，又要像邻家大姐姐一样真诚推荐。
+- **280字左右**，专业但有趣，直接输出文案。`
 
     const fallbacks = {
-        styleA: `到了这个年纪，早已过了被营销概念洗脑的阶段。护肤之于我，不再是迎合审美的手段，而是重建生活秩序的仪式。试过无数大牌，最终让我心安的竟是这瓶佰草集修源五行${productName}。它给我的不是瞬时的刺激，而是一种温润厚重的"支撑力"。人参固本、灵芝安神，这些老祖宗留下的智慧，在这个充满不确定的世界里，给了我最大的确定性。坚持用了三周，那种"内养生机"带来的年轻嘭弹，不是皮相的紧绷，而是骨子里的从容。在这浮躁的都市里，稳得住，才是最高级的保养。`,
-
-        styleB: `在欲望横流的都市，试图寻找一处精神的留白。黄昏时分，燃一线香，取这瓶佰草集修源五行${productName}。开盖瞬间，草本的香气若有似无，先苦后甘，像极了生活的隐喻。指尖触碰的瞬间，质地温润如玉，早已超越了护肤品的范畴。人参的力、牡丹的媚、紫苏的洁，化作天地能量沁入肌理。这不仅是涂抹，更是人与自然的私密对话。真正的"内养生机"，是静气，是滋养，是万物速朽中那份难得的恒常。`,
-
-        styleC: `作为长期关注皮肤科学文献的研究者，对佰草集修源五行${productName}做了成分解析。人参皂苷Rb1、Rg1被《Journal of Ginseng Research》证实可促进I型胶原合成；灵芝多糖β-葡聚糖强化角质层屏障功能；五味子木脂素具SOD活性；牡丹酚抑制酪氨酸酶；紫苏醛调控NF-κB通路抗炎。这种将传统方剂与现代提取技术结合的思路，体现了"内养生机"的循证逻辑——非速效表面修饰，而是调控细胞信号通路。28天观察周期，TEWL值下降，肤质改善明显。客观评价：值得尝试。`
+        styleA: `到了35岁，我不再相信"一夜回春"的鬼话，我只信奉"长期主义"带来的定力。最近连轴转的项目让我身心俱疲，好在有这瓶佰草集修源五行${productName}。它不是那种浮于表面的修饰，而是一种深层的"支撑力"。人参的元气、灵芝的安稳，这些流传千年的东方智慧，给了我最大的底气。在这个不确定的世界里，拥有一张"稳"得住的脸，就是对生活最好的掌控。`,
+        styleB: `黄昏，点一盏灯，卸下一日的浮躁。指尖触碰到佰草集修源五行${productName}的温润，草本的香气若有似无地散开，是苦后的回甘，也是生活的隐喻。人参、灵芝、牡丹...这些天地的馈赠，此刻化作能量沁入肌理。这不是简单的涂抹，而是一场关于"静"的修行。在万物速朽的时代，我们都需要这一份源于自然的恒常与滋养。`,
+        styleC: `很多粉丝问我，为什么国货现在这么强？看这瓶佰草集修源五行${productName}就知道了。别被"中草药"三个字吓退，它的逻辑非常现代——你可以把它想象成给皮肤细胞喝的"超级补剂"。人参负责"充电"，让细胞干活更有劲；灵芝负责"维稳"，像灭火器一样按住炎症。比起单一的化学成分，这种"五行组方"是更系统的整体调理。坚持用下来，你会发现脸不容易泛红了，那种由内而外透出来的光泽感，是皮肤真正"健康"的证明。`
     }
 
     const url = `${BASE_URL}/models/${TEXT_MODEL}:generateContent`
@@ -320,7 +340,7 @@ export async function generateUGCCopy(productName: string): Promise<{
                 headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 0.9, maxOutputTokens: 1024 }
+                    generationConfig: { temperature: 0.95, maxOutputTokens: 1024 } // 增加 temperature 以增加多样性
                 })
             })
             if (!response.ok) return fallback
@@ -331,9 +351,9 @@ export async function generateUGCCopy(productName: string): Promise<{
     }
 
     const [styleA, styleB, styleC] = await Promise.all([
-        generateOne(prompts.styleA, fallbacks.styleA),
-        generateOne(prompts.styleB, fallbacks.styleB),
-        generateOne(prompts.styleC, fallbacks.styleC)
+        generateOne(promptStyleA, fallbacks.styleA),
+        generateOne(promptStyleB, fallbacks.styleB),
+        generateOne(promptStyleC, fallbacks.styleC)
     ])
 
     console.log('[Gemini] 3-style copy generation complete')

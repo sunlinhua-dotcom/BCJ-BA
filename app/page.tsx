@@ -26,28 +26,53 @@ export default function HomePage() {
 
   const canSubmit = selectedProduct && envFile && !isSubmitting
 
+  const [realProgress, setRealProgress] = useState(0) // 真实进度百分比
+
   const handleSubmit = async () => {
     if (!canSubmit) return
-
     setIsSubmitting(true)
     setProgress('正在压缩图片...')
+    setRealProgress(0)
+
+    // 模拟平滑进度增长
+    let progressInterval: NodeJS.Timeout | null = null
+    const smoothProgress = (start: number, end: number, duration: number) => {
+      const startTime = Date.now()
+      progressInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime
+        const percent = Math.min(elapsed / duration, 1)
+
+        const current = start + (end - start) * percent
+        setRealProgress(Math.floor(current))
+        if (percent >= 1 && progressInterval) clearInterval(progressInterval)
+      }, 100)
+    }
 
     try {
-      // 客户端压缩环境图（与MI70一致）
+      // 阶段1: 客户端压缩 (0% -> 10%, 约2秒)
+      smoothProgress(0, 10, 2000)
       const compressedEnv = await compressImage(envFile, 1200, 0.8)
+      if (progressInterval) clearInterval(progressInterval)
 
+      // 阶段2: 上传 (10% -> 30%, 约3-5秒)
       setProgress('正在上传至服务器...')
+      smoothProgress(10, 30, 4000)
 
       const formData = new FormData()
       formData.append('productId', selectedProduct)
       formData.append('envFile', compressedEnv)
 
+      // 阶段3: AI 处理 (30% -> 95%, 约25-35秒)
       setProgress('AI正在创作中...')
+      smoothProgress(30, 95, 30000)
 
       const response = await fetch('/api/generate', {
         method: 'POST',
         body: formData
       })
+
+      if (progressInterval) clearInterval(progressInterval)
+      setRealProgress(100)
 
       const data = await response.json()
 
@@ -55,16 +80,17 @@ export default function HomePage() {
         throw new Error(data.error || '生成失败')
       }
 
-      // 存储结果到 sessionStorage 并跳转
+      // 存储结果并跳转
       sessionStorage.setItem('herborist_result', JSON.stringify({
         imageData: data.imageData,
-        copyTexts: data.copyTexts, // { styleA, styleB, styleC }
+        copyTexts: data.copyTexts,
         productName: data.productName
       }))
 
       router.push('/result')
 
     } catch (error: unknown) {
+      if (progressInterval) clearInterval(progressInterval)
       const errorMessage = error instanceof Error ? error.message : '生成失败'
       console.error('Submit error:', errorMessage)
 
@@ -236,23 +262,15 @@ export default function HomePage() {
               <div className="w-full bg-white/5 rounded-full h-1.5 mb-3 overflow-hidden">
                 <motion.div
                   className="h-full bg-gradient-to-r from-herb-gold/60 via-herb-gold to-herb-gold/60 rounded-full"
-                  initial={{ width: "0%" }}
-                  animate={{
-                    width: progress === '正在压缩图片...' ? "15%" :
-                      progress === '正在上传至服务器...' ? "35%" :
-                        progress === 'AI正在创作中...' ? "85%" : "5%"
-                  }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  animate={{ width: `${realProgress}%` }}
+                  transition={{ duration: 0.3 }}
                 />
               </div>
 
-              {/* 预计时间 */}
-              <div className="flex items-center gap-2 text-white/40 text-[10px] tracking-wider">
-                <motion.span
-                  animate={{ opacity: [0.4, 1, 0.4] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >●</motion.span>
-                <span>预计 20-40 秒</span>
+              {/* 进度百分比 */}
+              <div className="flex items-center justify-between text-white/40 text-[10px] tracking-wider mb-2">
+                <span>{realProgress}%</span>
+                <span>预计 {realProgress < 30 ? '30-40' : realProgress < 70 ? '20-30' : '10-20'} 秒</span>
               </div>
 
               {/* 底部提示 */}

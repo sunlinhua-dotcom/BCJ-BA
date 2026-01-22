@@ -25,7 +25,7 @@ export async function generateProductImage(
     console.log('[Gemini] Starting product image generation for:', productName)
     console.log('[Gemini] API Key exists:', !!API_KEY)
 
-    // 米其林美食摆盘风格提示词 - 自然摆放
+    // 强化光影真实度的提示词
     const prompt = `You are a world-class commercial photographer creating a LUXURIOUS skincare product image.
 
 BRAND: 佰草集 HERBORIST - ${productName}
@@ -36,48 +36,47 @@ INPUT IMAGES:
 - IMAGE 3: Environment/Scene (use as REAL BACKGROUND)
 
 ═══════════════════════════════════════════════════
-CREATE A MICHELIN-STAR FOOD PHOTOGRAPHY STYLE IMAGE
+CRITICAL: AVOID PS-LIKE COMPOSITING - MAKE IT PHOTOREALISTIC
 ═══════════════════════════════════════════════════
 
-COMPOSITION - Like a high-end product still life:
+LIGHTING & SHADOWS (Most Important):
 
-1. 【ENVIRONMENT】
-   - Use IMAGE 3 as the REAL background scene
-   - Find the best surface/table/spot in the scene
-   - Slightly soft focus for depth, but keep it realistic
+1. 【ANALYZE ENVIRONMENT LIGHT】
+   - Carefully study the LIGHT SOURCE in IMAGE 3 (window light? warm lamp? natural daylight?)
+   - Note the DIRECTION of light (from left/right/top/front?)
+   - Identify the COLOR TEMPERATURE (warm/cool/neutral?)
 
-2. 【PRODUCT - CENTER HERO】
-   - Place product bottle from IMAGE 2 in the CENTER
-   - Product is sharp, prominent, beautifully lit
-   - Realistic shadows and reflections matching the scene
+2. 【APPLY SAME LIGHTING TO PRODUCT & HERBS】
+   - Product bottle must have highlights and shadows matching the EXACT same light direction
+   - If environment has warm lamp light, product should have warm reflections
+   - If environment has window light from left, highlights must be on left side
+   - Bottle surface should REFLECT the environment colors subtly
 
-3. 【FIVE SACRED HERBS - NATURAL ARRANGEMENT】
-   Arrange these herbs DIRECTLY on the surface around the product,
-   like a chef plating a Michelin dish - NO bubbles, completely natural:
-   
-   - 长白山人参 (Fresh ginseng root with tendrils) - laid naturally on one side
-   - 灵芝 (Whole Lingzhi mushroom) - placed elegantly nearby
-   - 牡丹花瓣 (Scattered peony petals) - delicately around the base
-   - 紫苏叶 (Fresh purple perilla leaves) - artistically placed
-   - 北五味子 (Red schisandra berries) - small cluster on the surface
-   
-   These elements should:
-   - Look REAL and touchable, not CGI
-   - Cast natural shadows on the surface
-   - Be arranged with artistic balance but look effortless
-   - Complement the product without competing with it
+3. 【CAST REALISTIC SHADOWS】
+   - Product bottle casts a SOFT SHADOW on the surface in the SAME direction as other objects in scene
+   - Each herb element casts its own natural shadow
+   - Shadow softness matches environment (sharp for direct light, soft for diffused)
+   - Shadow color should match environment shadows (not pure black)
 
-4. 【LOGO】
-   - LOGO from IMAGE 1 in TOP LEFT corner
-   - 15-20% width, clear but subtle
+COMPOSITION:
 
-5. 【STYLE】
-   - Premium food/product photography
-   - Natural, warm lighting
-   - Editorial beauty magazine quality
-   - Oriental elegance meets modern luxury
+1. 【ENVIRONMENT】- Use IMAGE 3 as real background, slightly soft focused
+2. 【PRODUCT】- Center, sharp, REALISTICALLY integrated into the scene
+3. 【HERBS】- Arranged naturally on surface around product:
+   - 长白山人参 (Ginseng root) - left side, casting shadows
+   - 灵芝 (Lingzhi mushroom) - right side
+   - 牡丹花瓣 (Peony petals) - scattered artistically
+   - 紫苏叶 (Perilla leaves) - near product
+   - 北五味子 (Schisandra berries) - small cluster
+4. 【LOGO】- Top left, 15-20% width, subtle
 
-OUTPUT: 1:1 product poster - product centered with 5 herbs naturally arranged around it like Michelin food plating, LOGO top left, all realistically set in the environment.`
+FINAL CHECK:
+- Does the product look like it was ACTUALLY photographed in this scene?
+- Are all shadows pointing the SAME direction?
+- Does the lighting color MATCH the environment?
+- Would a professional photographer believe this is ONE SHOT, not composited?
+
+OUTPUT: 1:1 photorealistic product image that looks like a single photograph, not a composite.`
 
     const cleanLogoBase64 = logoBase64.replace(/^data:image\/\w+;base64,/, '')
     const cleanProductBase64 = productBase64.replace(/^data:image\/\w+;base64,/, '')
@@ -185,19 +184,43 @@ export async function generateUGCCopy(productName: string): Promise<{
     console.log('[Gemini] Generating 3-style UGC copy for:', productName)
 
     const prompts = {
-        styleA: `你是一位28岁的都市白领女性，热爱中式养生。请以第一人称分享使用佰草集修源五行【${productName}】的真实体验。开头用具体生活场景引入，自然提及五大仙草祖方（人参、灵芝、五味子、牡丹皮、紫苏叶），描述使用感受，融入"内养生机、年轻嘭弹"理念。语气亲切真实，像和姐妹分享，280-320字。直接输出文案。`,
+        styleA: `你是一个28岁的普通上班族，刚入手了佰草集修源五行【${productName}】。请写一段像在小红书上和姐妹们分享真实使用体验的文案。
 
-        styleB: `你是深谙东方养生的生活美学博主，文笔细腻优雅。为佰草集修源五行【${productName}】创作带有古风意境的分享。以四季节气开篇，将五大仙草智慧化作诗意叙事，描绘东方养护仪式感，用"嘭弹如初、肌若凝脂"等意象，收尾呼应"内养外修"理念。古典现代交融，280-320字。直接输出文案。`,
+要求：
+- 用日常口语，带语气词（真的、居然、哦、啊等）
+- 具体场景开头（比如：熬夜加班后照镜子、换季皮肤干燥等）
+- 提到五大仙草成分时要自然，像朋友推荐（"它里面有人参灵芝那些，一开始以为是噱头..."）
+- 保留品牌词"内养生机""年轻嘭弹"，但要融入口语表达
+- 可以提小缺点增加真实感（比如："刚开始味道有点中药味，后来就习惯了"）
+- 280-320字，直接输出文案`,
 
-        styleC: `你是护肤成分研究博主。为佰草集修源五行【${productName}】写成分党测评。开篇说对中草药从怀疑到认可，解读五大仙草现代功效（人参促胶原、灵芝强屏障、五味子收毛孔、牡丹皮提亮、紫苏叶抗炎），描述28天使用变化，点明"内养生机"有据可依。理性真诚推荐，280-320字。直接输出文案。`
+        styleB: `你是一个喜欢中式美学的博主，用有文采但不矫揉造作的文字分享佰草集修源五行【${productName}】。
+
+要求：
+- 可以从节气、季节、生活仪式感切入
+- 文笔优雅但要有人情味，像朋友在优雅地聊天
+- 五大仙草（人参、灵芝、五味子、牡丹皮、紫苏叶）用诗意但不夸张的方式描述
+- 融入"内养生机""年轻嘭弹"理念
+- 古典韵味但要接地气，避免纯文言或过度抒情
+- 280-320字，直接输出文案`,
+
+        styleC: `你是一个成分党博主，一开始对中草药护肤持怀疑态度，但用了佰草集修源五行【${productName}】后被圈粉。写一段真诚的测评文案。
+
+要求：
+- 开头坦诚自己之前的怀疑（"作为成分党，以前觉得中草药是智商税..."）
+- 科普五大仙草功效时要通俗易懂，像在给朋友科普
+- 描述真实使用周期和变化（可以提前期没感觉，后来慢慢有效果）
+- 保留"内养生机"品牌理念，但用理性角度解释
+- 语气专业但不说教，像个靠谱的朋友推荐
+- 280-320字，直接输出文案`
     }
 
     const fallbacks = {
-        styleA: `最近加班太多，照镜子发现自己脸色暗沉、法令纹都出来了。闺蜜推荐我试试佰草集修源五行系列的${productName}，说是五大仙草祖方，人参养元、灵芝安神、五味子收敛、牡丹皮活络、紫苏叶舒缓。抱着试试看的心态入手，第一次用就被惊艳！淡淡的草本清香，质地好推开，吸收快。坚持两周，皮肤明显透亮了，从内而外的光泽感真的难得。"内养生机，年轻嘭弹"现在真懂了，推荐给想好好养护肌肤的姐妹~`,
+        styleA: `姐妹们！最近被佰草集这个${productName}惊艳到了🔥 之前熬夜加班，脸上各种暗沉细纹，真的急死我了。闺蜜说你试试这个，里面有人参灵芝那些"五大仙草"，一开始我还想会不会是噱头啊...结果真香！用了第三天早上照镜子，皮肤居然有那种嘭嘭的感觉（就是"年轻嘭弹"那种），不是假滑哦。质地很好推开，吸收快，淡淡草本味我还挺喜欢的。坚持用了两周，连我妈都说我气色好了。"内养生机"这个理念我是真的信了，推荐给和我一样熬夜党的姐妹！`,
 
         styleB: `惊蛰过后，万物复苏，肌肤也在这个时节悄然苏醒。晨起对镜，取出案头的佰草集修源五行${productName}，开始一日的养护仪式。人参固本、灵芝安神、五味子敛阳、牡丹皮活络、紫苏叶舒缓——五大仙草的千年智慧，化作瓶中精华，轻点于指尖。草本清香萦绕鼻尖，仿佛置身晨雾药田。肌肤如久旱逢甘霖，一点点变得饱满透亮。内养生机，年轻嘭弹——这是与自己对话的东方美学。真正的美，是由内而外的从容与安然。`,
 
-        styleC: `作为成分党，我对"中草药护肤"一直持保留态度，直到遇见佰草集修源五行${productName}。研究成分表：人参皂苷促进胶原生成、抗氧化；灵芝多糖舒缓敏感、强化屏障；五味子木脂素收敛毛孔、提升弹性；牡丹皮丹皮酚促进微循环、提亮肤色；紫苏叶提取物抗炎舒敏。五大仙草搭配不是玄学，而是有据可依的古法今用。实测28天，毛孔细腻，脸色透亮，弹性回来了。"内养生机"这四个字，我服气了！`
+        styleC: `作为成分党，以前看到"中草药护肤"就觉得是智商税，直到用了佰草集修源五行${productName}。翻成分表发现还真不是噱头：人参皂苷促进胶原生成，灵芝多糖强化屏障，五味子收敛毛孔，牡丹皮提亮肤色，紫苏叶抗炎舒敏。五大仙草搭配是有现代科学依据的，不是玄学。实测前一周没啥感觉，两周后开始有变化，28天下来毛孔真的细腻了，脸色也透亮了。现在理解"内养生机"这个理念了——不是速效猛药，是真的在养护。谨慎推荐给和我一样理性挑剔的成分党姐妹！`
     }
 
     const url = `${BASE_URL}/models/${TEXT_MODEL}:generateContent`

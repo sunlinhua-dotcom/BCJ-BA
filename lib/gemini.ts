@@ -1,4 +1,5 @@
-import copyLibraryData from '@/app/data/copy_library.json'
+import fs from 'fs'
+import path from 'path'
 
 /**
  * 佰草集修源五行 - Gemini API 集成
@@ -364,33 +365,39 @@ ${randomContext}
     // 预生成的高定文案库 (Pre-generated Copy Library)
     // ==========================================
 
-    const copyLibrary = copyLibraryData as Record<string, Record<string, string[]>>
+    // 使用 fs.readFileSync 确保文件被正确读取
+    const copyLibraryPath = path.join(process.cwd(), 'app/data/copy_library.json')
+    let copyLibrary: Record<string, Record<string, string[]>> = {}
 
-    function getPreGeneratedCopy(productName: string, style: 'styleA' | 'styleB' | 'styleC'): string {
-        // Debug logging
-        console.log('[CopyLib] productName:', productName)
-        console.log('[CopyLib] available keys:', Object.keys(copyLibrary))
-
-        // 直接匹配产品名 (不再用模糊匹配)
-        const styleTexts = copyLibrary[productName]?.[style] || []
-        console.log('[CopyLib] styleTexts for', style, ':', styleTexts.length, 'items')
-
-        if (styleTexts.length === 0) {
-            console.warn('[CopyLib] No texts found for', productName, style)
-            return `佰草集${productName}，修护时光，遇见更美的自己。`
-        }
-
-        const result = getRandomItem(styleTexts)
-        console.log('[CopyLib] Selected:', result.substring(0, 30) + '...')
-        return result
+    try {
+        const jsonContent = fs.readFileSync(copyLibraryPath, 'utf-8')
+        copyLibrary = JSON.parse(jsonContent)
+        console.log('[CopyLib] Loaded library, keys:', Object.keys(copyLibrary))
+    } catch (e) {
+        console.error('[CopyLib] Failed to load library:', e)
     }
 
-    // 直接返回本地文案库 (跳过 API)
+    function getPreGeneratedCopy(pName: string, style: 'styleA' | 'styleB' | 'styleC'): string {
+        console.log('[CopyLib] Looking for product:', pName, 'style:', style)
+        const styleTexts = copyLibrary[pName]?.[style] || []
+        console.log('[CopyLib] Found', styleTexts.length, 'texts')
+
+        if (styleTexts.length === 0) {
+            return `佰草集${pName}，修护时光，遇见更美的自己。`
+        }
+        return styleTexts[Math.floor(Math.random() * styleTexts.length)]
+    }
+
+    // 直接返回本地文案库
     console.log('[Gemini] Using local copy library for:', productName)
     const styleA = getPreGeneratedCopy(productName, 'styleA')
     const styleB = getPreGeneratedCopy(productName, 'styleB')
     const styleC = getPreGeneratedCopy(productName, 'styleC')
 
-    console.log('[Gemini] 3-style copy generation complete')
+    console.log('[Gemini] Copy results:', {
+        styleA: styleA.substring(0, 30) + '...',
+        styleB: styleB.substring(0, 30) + '...',
+        styleC: styleC.substring(0, 30) + '...'
+    })
     return { styleA, styleB, styleC }
 }

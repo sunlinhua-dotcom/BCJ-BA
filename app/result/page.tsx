@@ -93,7 +93,7 @@ export default function ResultPage() {
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-12 h-12 relative animate-pulse">
                         <Image
-                            src="/logo-new.png"
+                            src="/logo.png"
                             alt="Herborist"
                             width={32}
                             height={32}
@@ -201,7 +201,7 @@ export default function ResultPage() {
                         </p>
                         {/* 装饰角标 */}
                         <div className="absolute top-0 right-0 p-3 opacity-10">
-                            <Image src="/logo-new.png" alt="watermark" width={24} height={24} />
+                            <Image src="/logo.png" alt="watermark" width={24} height={24} />
                         </div>
                     </div>
                 </motion.div>

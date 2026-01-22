@@ -30,6 +30,16 @@ export async function generateProductImage(
         '仙草乳': '100ml lotion bottle, approximately 13-15cm tall, medium pump bottle'
     }
 
+    // 产品外观材质 DNA (防止 AI 画成塑料)
+    const productMaterials: Record<string, string> = {
+        'default': `
+        - **MATERIAL**: Premium Matte White Porcelain (温润白瓷质感).
+        - **TEXTURE**: Jade-like finish, soft diffusion, NOT glossy plastic.
+        - **COLOR**: Warm White / Creamy White (Old Paper Tone). NOT bright blue-white.
+        - **FEEL**: Heavy, expensive, luxury ancient Chinese ceramic feel.`
+    }
+    const materialInfo = productMaterials['default']
+
     const sizeInfo = productSizes[productName] || '100ml bottle, approximately 13-15cm tall'
 
     // 判断是否有环境图
@@ -60,6 +70,11 @@ The product bottle in IMAGE 2 MUST be reproduced with EXACT accuracy:
 - **RESTORE LOGO**: The logo on the bottle in IMAGE 1 might be low-res. Use the distinct details from **IMAGE 3** to render the branding on the bottle sharply and accurately.
 - **PERSPECTIVE**: Apply the logo (from Image 3) onto the curved surface of the bottle naturally.
 - **NO FLOATING TEXT**: Do not add random text, watermarks, or logos to the background or corners.
+
+⚠️ MATERIAl & COLOR COMPLIANCE:
+${materialInfo}
+- STICTLY FORBIDDEN: Shiny plastic look, overly reflective surfaces, cold blue lighting.
+- The bottle must look like it is made of "Dehua White Porcelain" (德化白瓷).
 
 ═══════════════════════════════════════════════════
 YOUR TASK: CREATE A PROFESSIONAL PRODUCT PHOTOGRAPH
@@ -125,6 +140,11 @@ The product bottle in IMAGE 1 MUST be reproduced with EXACT accuracy:
 - **RESTORE LOGO**: The logo on the bottle in IMAGE 1 might be low-res. Use **IMAGE 2** (High-Res Logo) to render the branding on the bottle strictly and sharply.
 - **PERSPECTIVE**: Apply the logo (from Image 2) onto the curved surface of the bottle naturally.
 - **NO FLOATING TEXT**: Do not add random text, watermarks, or logos to the background or corners.
+
+⚠️ MATERIAl & COLOR COMPLIANCE:
+${materialInfo}
+- STICTLY FORBIDDEN: Shiny plastic look, overly reflective surfaces, cold blue lighting.
+- The bottle must look like it is made of "Dehua White Porcelain" (德化白瓷).
 
 ═══════════════════════════════════════════════════
 YOUR TASK: CREATE BACKGROUND + PRODUCT IMAGE

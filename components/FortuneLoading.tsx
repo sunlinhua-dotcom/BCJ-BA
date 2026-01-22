@@ -11,10 +11,13 @@ type Fortune = {
     interpret: string
 }
 
-export default function FortuneLoading() {
+export default function FortuneLoading({ externalProgress }: { externalProgress?: number }) {
     const [fortune, setFortune] = useState<Fortune | null>(null)
-    const [progress, setProgress] = useState(0)
+    const [internalProgress, setInternalProgress] = useState(0)
     const [showText, setShowText] = useState(false)
+
+    // 最终显示的进度位
+    const displayProgress = externalProgress !== undefined ? externalProgress : internalProgress
 
     useEffect(() => {
         // 1. 随机抽取签文
@@ -24,14 +27,18 @@ export default function FortuneLoading() {
         // 2. 延迟显示文字，制造"显影"的仪式感
         setTimeout(() => setShowText(true), 1500)
 
-        // 3. 进度条逻辑
-        const duration = 25000
-        const interval = 100
-        const step = 100 / (duration / interval)
-
+        // 3. 仿心理学进度条逻辑：前期快，后期慢，不封顶但逼近 99
+        let currentProgress = 0
         const timer = setInterval(() => {
-            setProgress(prev => Math.min(prev + step, 99))
-        }, interval)
+            if (currentProgress < 70) {
+                currentProgress += Math.random() * 5 // 前期爆发
+            } else if (currentProgress < 90) {
+                currentProgress += Math.random() * 1 // 中期沉稳
+            } else if (currentProgress < 99) {
+                currentProgress += (99 - currentProgress) * 0.1 // 无限逼近但不到 100
+            }
+            setInternalProgress(currentProgress)
+        }, 300)
 
         return () => clearInterval(timer)
     }, [])
@@ -89,11 +96,11 @@ export default function FortuneLoading() {
                 <div className="w-full h-[1px] bg-white/5 relative overflow-hidden">
                     <div
                         className="absolute left-0 top-0 h-full bg-[#8B7355]/60 shadow-[0_0_10px_#8B7355]"
-                        style={{ width: `${progress}%`, transition: 'width 0.1s linear' }}
+                        style={{ width: `${displayProgress}%`, transition: 'width 0.3s ease-out' }}
                     />
                 </div>
                 <span className="text-[9px] text-[#8B7355]/40 tracking-[0.3em] font-mono uppercase animate-pulse">
-                    AI Generating · {Math.floor(progress)}%
+                    AI Generating · {Math.floor(displayProgress)}%
                 </span>
             </div>
         </div>

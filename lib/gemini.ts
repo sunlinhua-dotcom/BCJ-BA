@@ -8,7 +8,7 @@ import path from 'path'
 
 const API_KEY = process.env.GEMINI_API_KEY || 'sk-g8JehwXjfoWKeHxvDdAe2277FeA24c0094B7E6Fe5566346b'
 const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-3-pro-image-preview'
-const TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-3-pro-image-preview'
+const TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-1.5-pro'
 const BASE_URL = process.env.GEMINI_BASE_URL || 'https://api.apiyi.com/v1beta'
 
 /**
@@ -365,39 +365,54 @@ ${randomContext}
     // 预生成的高定文案库 (Pre-generated Copy Library)
     // ==========================================
 
-    // 使用 fs.readFileSync 确保文件被正确读取
     const copyLibraryPath = path.join(process.cwd(), 'app/data/copy_library.json')
     let copyLibrary: Record<string, Record<string, string[]>> = {}
 
     try {
         const jsonContent = fs.readFileSync(copyLibraryPath, 'utf-8')
         copyLibrary = JSON.parse(jsonContent)
-        console.log('[CopyLib] Loaded library, keys:', Object.keys(copyLibrary))
     } catch (e) {
         console.error('[CopyLib] Failed to load library:', e)
     }
 
     function getPreGeneratedCopy(pName: string, style: 'styleA' | 'styleB' | 'styleC'): string {
-        console.log('[CopyLib] Looking for product:', pName, 'style:', style)
-        const styleTexts = copyLibrary[pName]?.[style] || []
-        console.log('[CopyLib] Found', styleTexts.length, 'texts')
+        const cleanName = pName.trim()
+        const styleTexts = copyLibrary[cleanName]?.[style] || []
 
         if (styleTexts.length === 0) {
-            return `佰草集${pName}，修护时光，遇见更美的自己。`
+            return `佰草集${cleanName}，修护时光，遇见更美的自己。`
         }
         return styleTexts[Math.floor(Math.random() * styleTexts.length)]
     }
 
-    // 直接返回本地文案库
-    console.log('[Gemini] Using local copy library for:', productName)
-    const styleA = getPreGeneratedCopy(productName, 'styleA')
-    const styleB = getPreGeneratedCopy(productName, 'styleB')
-    const styleC = getPreGeneratedCopy(productName, 'styleC')
+    const url = `${BASE_URL}/models/${TEXT_MODEL}:generateContent`
 
-    console.log('[Gemini] Copy results:', {
-        styleA: styleA.substring(0, 30) + '...',
-        styleB: styleB.substring(0, 30) + '...',
-        styleC: styleC.substring(0, 30) + '...'
-    })
+    const generateOne = async (prompt: string, fallback: string): Promise<string> => {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { temperature: 0.9, maxOutputTokens: 1024 }
+                })
+            })
+            if (!response.ok) return fallback
+            const data = await response.json()
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text
+            return text?.trim() || fallback
+        } catch (e) {
+            console.error('[Gemini] Copy generation error:', e)
+            return fallback
+        }
+    }
+
+    console.log('[Gemini] Generating 3-style AI copy...')
+    const [styleA, styleB, styleC] = await Promise.all([
+        generateOne(promptStyleA, getPreGeneratedCopy(productName, 'styleA')),
+        generateOne(promptStyleB, getPreGeneratedCopy(productName, 'styleB')),
+        generateOne(promptStyleC, getPreGeneratedCopy(productName, 'styleC'))
+    ])
+
     return { styleA, styleB, styleC }
 }

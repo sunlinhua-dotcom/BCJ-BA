@@ -249,7 +249,7 @@ export default function HomePage() {
                   transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                   className="w-full h-full"
                 >
-                  <Image src="/logo-new.png" alt="Loading" fill unoptimized className="object-contain" />
+                  <Image src="/logo.png" alt="Loading" fill unoptimized className="object-contain" />
                 </motion.div>
                 {/* 发光效果 */}
                 <div className="absolute inset-0 bg-herb-gold/20 blur-2xl rounded-full -z-10" />

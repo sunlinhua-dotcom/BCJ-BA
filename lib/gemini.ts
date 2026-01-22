@@ -25,58 +25,81 @@ export async function generateProductImage(
     console.log('[Gemini] Starting product image generation for:', productName)
     console.log('[Gemini] API Key exists:', !!API_KEY)
 
-    // 强化光影真实度的提示词
-    const prompt = `You are a world-class commercial photographer creating a LUXURIOUS skincare product image.
+    // 专业摄影师级别的提示词
+    const prompt = `You are a MASTER COMMERCIAL PHOTOGRAPHER creating a premium skincare product image.
 
 BRAND: 佰草集 HERBORIST - ${productName}
 
 INPUT IMAGES:
-- IMAGE 1: Brand LOGO (佰草集 HERBORIST)
+- IMAGE 1: Brand LOGO
 - IMAGE 2: Product bottle
-- IMAGE 3: Environment/Scene (use as REAL BACKGROUND)
+- IMAGE 3: Environment scene (your shooting location)
 
 ═══════════════════════════════════════════════════
-CRITICAL: AVOID PS-LIKE COMPOSITING - MAKE IT PHOTOREALISTIC
+YOUR TASK: CREATE A PROFESSIONAL PRODUCT PHOTOGRAPH
 ═══════════════════════════════════════════════════
 
-LIGHTING & SHADOWS (Most Important):
+STEP 1: ANALYZE THE ENVIRONMENT (IMAGE 3)
+- What type of scene is this? (tea house, café, natural setting, spa, etc.)
+- Identify the BEST SURFACE to place the product (wooden table, stone counter, window sill, etc.)
+- Find the most visually appealing angle and composition
+- Locate the LIGHT SOURCE (window, lamp, natural light direction)
 
-1. 【ANALYZE ENVIRONMENT LIGHT】
-   - Carefully study the LIGHT SOURCE in IMAGE 3 (window light? warm lamp? natural daylight?)
-   - Note the DIRECTION of light (from left/right/top/front?)
-   - Identify the COLOR TEMPERATURE (warm/cool/neutral?)
+STEP 2: INTELLIGENT COMPOSITION
+- Choose the optimal shooting position like a professional photographer would
+- Product should be placed on the best surface you identified
+- Background elements (people, furniture, decor) should be naturally BLURRED with depth of field
+- Create a focal point on the product while maintaining environmental atmosphere
 
-2. 【APPLY SAME LIGHTING TO PRODUCT & HERBS】
-   - Product bottle must have highlights and shadows matching the EXACT same light direction
-   - If environment has warm lamp light, product should have warm reflections
-   - If environment has window light from left, highlights must be on left side
-   - Bottle surface should REFLECT the environment colors subtly
+STEP 3: PRODUCT PLACEMENT (CRITICAL - MUST BE REALISTIC)
+- Place product bottle from IMAGE 2 STANDING ON the chosen surface
+- Product MUST have a contact point with the surface (not floating!)
+- Cast a NATURAL CONTACT SHADOW beneath the product
+- Product material (ceramic/glass bottle) must show:
+  * Realistic highlights from the light source
+  * Subtle reflections of environment colors
+  * Proper texture and gloss
 
-3. 【CAST REALISTIC SHADOWS】
-   - Product bottle casts a SOFT SHADOW on the surface in the SAME direction as other objects in scene
-   - Each herb element casts its own natural shadow
-   - Shadow softness matches environment (sharp for direct light, soft for diffused)
-   - Shadow color should match environment shadows (not pure black)
+STEP 4: FIVE SACRED HERBS ARRANGEMENT
+Place these herbs NATURALLY ON THE SURFACE around the product:
+- 长白山人参 (Ginseng root with tendrils) - laid on surface, left side
+- 灵芝 (Lingzhi mushroom) - placed on surface, right side  
+- 牡丹花瓣 (Peony petals) - SCATTERED on the surface
+- 紫苏叶 (Fresh perilla leaves) - laid near product
+- 北五味子 (Red schisandra berries) - small cluster on surface
 
-COMPOSITION:
+EACH ELEMENT MUST:
+- Touch the surface (not floating)
+- Cast its own natural shadow
+- Look fresh and real, not CGI
+- Have proper texture (leaves should look soft, berries glossy, etc.)
 
-1. 【ENVIRONMENT】- Use IMAGE 3 as real background, slightly soft focused
-2. 【PRODUCT】- Center, sharp, REALISTICALLY integrated into the scene
-3. 【HERBS】- Arranged naturally on surface around product:
-   - 长白山人参 (Ginseng root) - left side, casting shadows
-   - 灵芝 (Lingzhi mushroom) - right side
-   - 牡丹花瓣 (Peony petals) - scattered artistically
-   - 紫苏叶 (Perilla leaves) - near product
-   - 北五味子 (Schisandra berries) - small cluster
-4. 【LOGO】- Top left, 15-20% width, subtle
+STEP 5: LIGHTING & SHADOWS (MOST CRITICAL)
+- ALL elements share the SAME LIGHT SOURCE from the environment
+- Shadows point in the SAME DIRECTION
+- Shadow softness matches the light type (soft for diffused, sharp for direct)
+- Highlights on product and herbs come from THE SAME ANGLE
+- Color temperature matches environment (warm lamp = warm reflections)
 
-FINAL CHECK:
-- Does the product look like it was ACTUALLY photographed in this scene?
-- Are all shadows pointing the SAME direction?
-- Does the lighting color MATCH the environment?
-- Would a professional photographer believe this is ONE SHOT, not composited?
+STEP 6: DEPTH OF FIELD
+- Product and herbs: SHARP FOCUS
+- Background: Naturally BLURRED using photography depth of field
+- NOT simple blur - should look like shot with f/2.8-f/4 aperture
+- Bokeh effect if there are lights in background
 
-OUTPUT: 1:1 photorealistic product image that looks like a single photograph, not a composite.`
+STEP 7: LOGO
+- Place LOGO from IMAGE 1 in TOP LEFT corner
+- 15-20% of image width
+- Subtle and elegant, not distracting
+
+FINAL QUALITY CHECK:
+✓ Does this look like ONE photograph taken by a professional photographer?
+✓ Can you see where the product is sitting? (contact point visible)
+✓ Do all shadows point the same direction?
+✓ Is the background blurred naturally with depth of field?
+✓ Would this photo work in a high-end beauty magazine?
+
+OUTPUT: 1:1 ratio photorealistic product image that looks like a single professional photograph, not a digital composite.`
 
     const cleanLogoBase64 = logoBase64.replace(/^data:image\/\w+;base64,/, '')
     const cleanProductBase64 = productBase64.replace(/^data:image\/\w+;base64,/, '')

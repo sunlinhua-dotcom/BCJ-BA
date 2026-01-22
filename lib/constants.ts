@@ -8,7 +8,7 @@ export const PRODUCTS = [
     },
     {
         id: 'water',
-        name: '仙草水',
+        name: '仙草露',
         sub: '细腻柔光',
         image: '/products/water.webp',
         description: '16万仙草油啵啵，透老醇萃98.7%'

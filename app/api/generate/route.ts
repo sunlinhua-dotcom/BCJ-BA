@@ -35,9 +35,10 @@ export async function POST(req: Request) {
         const logoBase64 = compressedLogo.toString('base64')
         console.log('[API] Logo compressed:', (compressedLogo.length / 1024).toFixed(0), 'KB')
 
-        // 读取产品图片并压缩 - 降至 800px 加速传输
-        const productImagePath = path.join(process.cwd(), 'public', 'products', `${productId}.webp`)
+        // 读取产品图片（AI 专用参考图，与页面展示图分开）
+        const productImagePath = path.join(process.cwd(), 'public', 'products-ai', `${productId}.png`)
         const productBuffer = fs.readFileSync(productImagePath)
+        console.log('[API] Product AI reference image loaded:', productId)
         let processedProductBuffer: Buffer
         try {
             processedProductBuffer = await sharp(productBuffer)

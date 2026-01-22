@@ -33,12 +33,12 @@ export async function generateProductImage(
     }
 
     // 产品外观材质 DNA (防止 AI 画成塑料)
+    // 产品外观材质 DNA (强制还原原色)
     const productMaterials: Record<string, string> = {
         'default': `
-        - **MATERIAL**: Premium Matte White Porcelain (温润白瓷质感).
-        - **TEXTURE**: Jade-like finish, soft diffusion, NOT glossy plastic.
-        - **COLOR**: Warm White / Creamy White (Old Paper Tone). NOT bright blue-white.
-        - **FEEL**: Heavy, expensive, luxury ancient Chinese ceramic feel.`
+        - **MATERIAL**: Original Bottle Material (Keep Exact Texture).
+        - **COLOR**: **ORIGINAL BOTTLE COLOR** (Do not warm/cool it).
+        - **FINISH**: Match the gloss/matte finish of IMAGE 1 exactly.`
     }
     const materialInfo = productMaterials['default']
 
@@ -75,8 +75,12 @@ The product bottle in IMAGE 2 MUST be reproduced with EXACT accuracy:
 
 ⚠️ MATERIAl & COLOR COMPLIANCE:
 ${materialInfo}
-- STICTLY FORBIDDEN: Shiny plastic look, overly reflective surfaces, cold blue lighting.
-- The bottle must look like it is made of "Dehua White Porcelain" (德化白瓷).
+⚠️ MATERIAl & COLOR COMPLIANCE:
+${materialInfo}
+- STICTLY FORBIDDEN: Changing the bottle color.
+- The bottle color must be SAMPLED directly from IMAGE 1.
+- If the bottle is white, keep it WHITE (not yellow, not blue).
+- If the bottle is matte, keep it MATTE.
 
 ═══════════════════════════════════════════════════
 YOUR TASK: CREATE A PROFESSIONAL PRODUCT PHOTOGRAPH
@@ -145,8 +149,12 @@ The product bottle in IMAGE 1 MUST be reproduced with EXACT accuracy:
 
 ⚠️ MATERIAl & COLOR COMPLIANCE:
 ${materialInfo}
-- STICTLY FORBIDDEN: Shiny plastic look, overly reflective surfaces, cold blue lighting.
-- The bottle must look like it is made of "Dehua White Porcelain" (德化白瓷).
+⚠️ MATERIAl & COLOR COMPLIANCE:
+${materialInfo}
+- STICTLY FORBIDDEN: Changing the bottle color.
+- The bottle color must be SAMPLED directly from IMAGE 1.
+- If the bottle is white, keep it WHITE (not yellow, not blue).
+- If the bottle is matte, keep it MATTE.
 
 ═══════════════════════════════════════════════════
 YOUR TASK: CREATE BACKGROUND + PRODUCT IMAGE

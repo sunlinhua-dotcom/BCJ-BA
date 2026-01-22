@@ -361,52 +361,36 @@ ${randomContext}
 - **280字左右**，专业但有趣，直接输出文案。`
 
     // ==========================================
-    // 预生成的高定文案库 (Pre-generated API Copy Library)
-    // 用于作为 API 失败时的兜底，或直接作为高质量来源
+    // 预生成的高定文案库 (Pre-generated Copy Library)
     // ==========================================
 
     const copyLibrary = copyLibraryData as Record<string, Record<string, string[]>>
 
     function getPreGeneratedCopy(productName: string, style: 'styleA' | 'styleB' | 'styleC'): string {
-        // 匹配产品名 (Constants里的名字和 key 可能有细微差别，做模糊匹配)
-        const productKey = Object.keys(copyLibrary).find(k => k.includes(productName) || productName.includes(k)) || '仙草霜'
+        // Debug logging
+        console.log('[CopyLib] productName:', productName)
+        console.log('[CopyLib] available keys:', Object.keys(copyLibrary))
 
-        const styleTexts = copyLibrary[productKey]?.[style] || []
+        // 直接匹配产品名 (不再用模糊匹配)
+        const styleTexts = copyLibrary[productName]?.[style] || []
+        console.log('[CopyLib] styleTexts for', style, ':', styleTexts.length, 'items')
+
         if (styleTexts.length === 0) {
+            console.warn('[CopyLib] No texts found for', productName, style)
             return `佰草集${productName}，修护时光，遇见更美的自己。`
         }
 
-        return getRandomItem(styleTexts)
+        const result = getRandomItem(styleTexts)
+        console.log('[CopyLib] Selected:', result.substring(0, 30) + '...')
+        return result
     }
 
-    // ----------------------------------------------------------------
-
-    const url = `${BASE_URL}/models/${TEXT_MODEL}:generateContent`
-
-    const generateOne = async (prompt: string, fallback: string): Promise<string> => {
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 0.95, maxOutputTokens: 1024 }
-                })
-            })
-            if (!response.ok) return fallback
-            const data = await response.json()
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text
-            return text?.trim() || fallback
-        } catch { return fallback }
-    }
-
-    // 直接使用本地文案库（API 不稳定，暂时禁用）
+    // 直接返回本地文案库 (跳过 API)
+    console.log('[Gemini] Using local copy library for:', productName)
     const styleA = getPreGeneratedCopy(productName, 'styleA')
     const styleB = getPreGeneratedCopy(productName, 'styleB')
     const styleC = getPreGeneratedCopy(productName, 'styleC')
 
-    console.log('[Gemini] 3-style copy generation complete (using local library)')
+    console.log('[Gemini] 3-style copy generation complete')
     return { styleA, styleB, styleC }
 }
-
-

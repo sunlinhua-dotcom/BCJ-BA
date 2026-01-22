@@ -19,7 +19,7 @@ const BASE_URL = process.env.GEMINI_BASE_URL || 'https://api.apiyi.com/v1beta'
 export async function generateProductImage(
     logoBase64: string,
     productBase64: string,
-    envBase64: string,
+    envBase64: string | undefined,
     productName: string
 ): Promise<string> {
     // 产品真实尺寸信息
@@ -32,16 +32,31 @@ export async function generateProductImage(
 
     const sizeInfo = productSizes[productName] || '100ml bottle, approximately 13-15cm tall'
 
-    // 专业摄影师级别的提示词
-    const prompt = `You are a MASTER COMMERCIAL PHOTOGRAPHER creating a premium skincare product image.
+    // 判断是否有环境图
+    const hasEnvironment = envBase64 && envBase64.length > 100
+
+    // 根据是否有环境图选择不同的 prompt
+    const prompt = hasEnvironment
+        ? `You are a MASTER COMMERCIAL PHOTOGRAPHER creating a premium skincare product image.
 
 BRAND: 佰草集 HERBORIST - ${productName}
 PRODUCT SIZE: ${sizeInfo}
 
 INPUT IMAGES:
 - IMAGE 1: Brand LOGO
-- IMAGE 2: Product bottle (${sizeInfo})
+- IMAGE 2: Product bottle (${sizeInfo}) - MUST BE REPRODUCED EXACTLY
 - IMAGE 3: Environment scene (your shooting location)
+
+═══════════════════════════════════════════════════
+⚠️ CRITICAL: PRODUCT ACCURACY
+═══════════════════════════════════════════════════
+The product bottle in IMAGE 2 MUST be reproduced with EXACT accuracy:
+- Bottle shape, proportions, and silhouette must match EXACTLY
+- Label design, text, and graphics must be IDENTICAL
+- Color scheme must be PRECISE
+- Cap/lid design must match EXACTLY
+- DO NOT alter, redesign, or "improve" the product appearance
+- Treat IMAGE 2 as a sacred reference - copy it faithfully
 
 ═══════════════════════════════════════════════════
 YOUR TASK: CREATE A PROFESSIONAL PRODUCT PHOTOGRAPH
@@ -49,75 +64,109 @@ YOUR TASK: CREATE A PROFESSIONAL PRODUCT PHOTOGRAPH
 
 STEP 1: ANALYZE THE ENVIRONMENT (IMAGE 3)
 - What type of scene is this? (tea house, café, natural setting, spa, etc.)
-- Identify the BEST SURFACE to place the product (wooden table, stone counter, window sill, etc.)
+- Identify the BEST SURFACE to place the product
 - Find the most visually appealing angle and composition
-- Locate the LIGHT SOURCE (window, lamp, natural light direction)
+- Locate the LIGHT SOURCE
 
 STEP 2: INTELLIGENT COMPOSITION
-- Choose the optimal shooting position like a professional photographer would
-- Product should be placed on the best surface you identified
-- Background elements (people, furniture, decor) should be naturally BLURRED with depth of field
-- Create a focal point on the product while maintaining environmental atmosphere
+- Choose the optimal shooting position like a professional photographer
+- Product placed on the best surface identified
+- Background elements naturally BLURRED with depth of field
 
-STEP 3: PRODUCT PLACEMENT (CRITICAL - MUST BE REALISTIC)
-- Place product bottle from IMAGE 2 STANDING ON the chosen surface
-- Product MUST have a contact point with the surface (not floating!)
-- **SCALE ACCURACY**: Product size must match its real dimensions (${sizeInfo})
-  * If it's a 5cm tall jar, it should look small and compact
-  * If it's a 15cm tall bottle, it should appear taller and more slender
-  * Compare to typical objects: a 5cm jar is about the size of a golf ball in height
-  * A 15cm bottle is roughly the length of a smartphone
-- Cast a NATURAL CONTACT SHADOW beneath the product
-- Product material (ceramic/glass bottle) must show:
-  * Realistic highlights from the light source
-  * Subtle reflections of environment colors
-  * Proper texture and gloss
-  * Bottle should look SOLID and three-dimensional, not flat
+STEP 3: PRODUCT PLACEMENT
+- Place the EXACT product bottle from IMAGE 2 STANDING ON the surface
+- Product MUST have a contact point (not floating!)
+- **SCALE**: Match real dimensions (${sizeInfo})
+- Cast a NATURAL CONTACT SHADOW
+- Show realistic highlights, reflections, and texture
 
-STEP 4: FIVE SACRED HERBS ARRANGEMENT
-Place these herbs NATURALLY ON THE SURFACE around the product:
-- 长白山人参 (Ginseng root with tendrils) - laid on surface, left side
-- 灵芝 (Lingzhi mushroom) - placed on surface, right side  
-- 牡丹花瓣 (Peony petals) - SCATTERED on the surface
-- 紫苏叶 (Fresh perilla leaves) - laid near product
-- 北五味子 (Red schisandra berries) - small cluster on surface
+STEP 4: FIVE SACRED HERBS
+Place naturally ON THE SURFACE around the product:
+- 长白山人参 (Ginseng root) - left side
+- 灵芝 (Lingzhi) - right side
+- 牡丹花瓣 (Peony petals) - scattered
+- 紫苏叶 (Perilla leaves) - near product
+- 北五味子 (Schisandra berries) - small cluster
 
-EACH ELEMENT MUST:
-- Touch the surface (not floating)
-- Cast its own natural shadow
-- Look fresh and real, not CGI
-- Have proper texture (leaves should look soft, berries glossy, etc.)
+Each element: touches surface, casts shadow, looks fresh and real.
 
-STEP 5: LIGHTING & SHADOWS (MOST CRITICAL)
-- ALL elements share the SAME LIGHT SOURCE from the environment
-- Shadows point in the SAME DIRECTION
-- Shadow softness matches the light type (soft for diffused, sharp for direct)
-- Highlights on product and herbs come from THE SAME ANGLE
-- Color temperature matches environment (warm lamp = warm reflections)
+STEP 5: LIGHTING & SHADOWS
+ALL elements share the SAME light source. Shadows point SAME direction.
 
 STEP 6: DEPTH OF FIELD
-- Product and herbs: SHARP FOCUS
-- Background: Naturally BLURRED using photography depth of field
-- NOT simple blur - should look like shot with f/2.8-f/4 aperture
-- Bokeh effect if there are lights in background
+Product and herbs: SHARP. Background: naturally BLURRED (f/2.8-f/4).
 
 STEP 7: LOGO
-- Place LOGO from IMAGE 1 in TOP LEFT corner
-- 15-20% of image width
-- Subtle and elegant, not distracting
+Place LOGO from IMAGE 1 in TOP LEFT corner, 15-20% width.
 
-FINAL QUALITY CHECK:
-✓ Does this look like ONE photograph taken by a professional photographer?
-✓ Can you see where the product is sitting? (contact point visible)
-✓ Do all shadows point the same direction?
-✓ Is the background blurred naturally with depth of field?
-✓ Would this photo work in a high-end beauty magazine?
+OUTPUT: 1:1 ratio photorealistic product image.`
 
-OUTPUT: 1:1 ratio photorealistic product image that looks like a single professional photograph, not a digital composite.`
+        : `You are a MASTER COMMERCIAL PHOTOGRAPHER creating a premium skincare product image with a DREAMY BACKGROUND.
+
+BRAND: 佰草集 HERBORIST - ${productName}
+PRODUCT SIZE: ${sizeInfo}
+
+INPUT IMAGES:
+- IMAGE 1: Brand LOGO  
+- IMAGE 2: Product bottle (${sizeInfo}) - MUST BE REPRODUCED EXACTLY
+
+═══════════════════════════════════════════════════
+⚠️ CRITICAL: PRODUCT ACCURACY
+═══════════════════════════════════════════════════
+The product bottle in IMAGE 2 MUST be reproduced with EXACT accuracy:
+- Bottle shape, proportions, and silhouette must match EXACTLY
+- Label design, text, and graphics must be IDENTICAL
+- Color scheme must be PRECISE
+- Cap/lid design must match EXACTLY
+- DO NOT alter, redesign, or "improve" the product appearance
+
+═══════════════════════════════════════════════════
+YOUR TASK: CREATE BACKGROUND + PRODUCT IMAGE
+═══════════════════════════════════════════════════
+
+STEP 1: CREATE A STUNNING INS-STYLE BACKGROUND
+Since no environment photo is provided, CREATE a beautiful background:
+- Style: Instagram-worthy, high-end lifestyle aesthetic
+- Options (choose the most suitable):
+  * Marble table with soft morning window light
+  * Wooden vanity table with golden hour sunlight
+  * Stone counter in a zen spa setting
+  * Elegant tea table with natural elements
+- Mood: Warm, inviting, luxurious, Oriental zen
+- Light: Soft, diffused, warm tone (golden hour preferred)
+- Include subtle environmental elements (shadows, bokeh, texture)
+
+STEP 2: PLACE THE EXACT PRODUCT
+- Place the EXACT product from IMAGE 2 on the surface
+- Product MUST have contact with surface (not floating!)
+- **SCALE**: Match real dimensions (${sizeInfo})
+- Cast a NATURAL CONTACT SHADOW
+- Show realistic highlights and reflections matching the light
+
+STEP 3: FIVE SACRED HERBS
+Arrange naturally ON THE SURFACE around the product:
+- 长白山人参 (Ginseng root) - left side
+- 灵芝 (Lingzhi) - right side
+- 牡丹花瓣 (Peony petals) - scattered elegantly
+- 紫苏叶 (Perilla leaves) - near product
+- 北五味子 (Schisandra berries) - small cluster
+
+Each element: fresh, realistic, casting natural shadows.
+
+STEP 4: UNIFIED LIGHTING
+ALL elements share ONE light source from the background you created.
+
+STEP 5: DEPTH OF FIELD
+Product and herbs: SHARP FOCUS. Background: naturally BLURRED.
+
+STEP 6: LOGO
+Place LOGO from IMAGE 1 in TOP LEFT corner, 15-20% width.
+
+OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.`
 
     const cleanLogoBase64 = logoBase64.replace(/^data:image\/\w+;base64,/, '')
     const cleanProductBase64 = productBase64.replace(/^data:image\/\w+;base64,/, '')
-    const cleanEnvBase64 = envBase64.replace(/^data:image\/\w+;base64,/, '')
+    const cleanEnvBase64 = hasEnvironment ? envBase64.replace(/^data:image\/\w+;base64,/, '') : ''
 
     const url = `${BASE_URL}/models/${IMAGE_MODEL}:generateContent`
     const startTime = Date.now()
@@ -145,7 +194,7 @@ OUTPUT: 1:1 ratio photorealistic product image that looks like a single professi
                             { text: prompt },
                             { inline_data: { mime_type: "image/png", data: cleanLogoBase64 } },
                             { inline_data: { mime_type: "image/jpeg", data: cleanProductBase64 } },
-                            { inline_data: { mime_type: "image/jpeg", data: cleanEnvBase64 } }
+                            ...(hasEnvironment ? [{ inline_data: { mime_type: "image/jpeg", data: cleanEnvBase64 } }] : [])
                         ]
                     }],
                     generationConfig: {

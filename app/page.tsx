@@ -24,7 +24,7 @@ export default function HomePage() {
     setIsMounted(true)
   }, [])
 
-  const canSubmit = selectedProduct && envFile && !isSubmitting
+  const canSubmit = selectedProduct && !isSubmitting // envFile is now optional
 
   const [realProgress, setRealProgress] = useState(0) // 真实进度百分比
 
@@ -51,7 +51,12 @@ export default function HomePage() {
     try {
       // 阶段1: 客户端压缩 (0% -> 10%, 约2秒)
       smoothProgress(0, 10, 2000)
-      const compressedEnv = await compressImage(envFile, 1200, 0.8)
+
+      let compressedEnv: File | null = null
+      if (envFile) {
+        compressedEnv = await compressImage(envFile, 1200, 0.8)
+      }
+
       if (progressInterval) clearInterval(progressInterval)
 
       // 阶段2: 上传 (10% -> 30%, 约3-5秒)
@@ -59,8 +64,10 @@ export default function HomePage() {
       smoothProgress(10, 30, 4000)
 
       const formData = new FormData()
-      formData.append('productId', selectedProduct)
-      formData.append('envFile', compressedEnv)
+      formData.append('productId', selectedProduct!)
+      if (compressedEnv) {
+        formData.append('envFile', compressedEnv)
+      }
 
       // 阶段3: AI 处理 (30% -> 95%, 约25-35秒)
       setProgress('AI正在创作中...')

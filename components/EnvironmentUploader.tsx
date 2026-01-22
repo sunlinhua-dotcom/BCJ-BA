@@ -42,7 +42,7 @@ export function EnvironmentUploader({ file, onFileChange }: EnvironmentUploaderP
                     <span className="text-[10px] text-herb-accent/60 tracking-[0.2em] font-light uppercase mb-1">
                         Upload Environment
                     </span>
-                    <h2 className="text-sm font-serif text-herb-dark tracking-wider">上传环境图</h2>
+                    <h2 className="text-sm font-serif text-herb-dark tracking-wider">拍摄场景</h2>
                 </div>
                 {file && (
                     <button
@@ -102,10 +102,10 @@ export function EnvironmentUploader({ file, onFileChange }: EnvironmentUploaderP
                             </motion.div>
 
                             <h3 className="text-sm font-serif text-herb-dark mb-1 tracking-wider">
-                                {isDragging ? '松开以上传' : '点此上传环境图'}
+                                {isDragging ? '松开以上传' : '上传你的环境照片'}
                             </h3>
-                            <p className="text-[10px] text-herb-accent/70 tracking-widest uppercase opacity-60">
-                                Drag & Drop or Click to Browse
+                            <p className="text-[11px] text-herb-accent/80 tracking-wide mt-1">
+                                或让 AI 为你造梦
                             </p>
                         </div>
                     </motion.div>

@@ -9,6 +9,7 @@ const notoserif = Noto_Serif_SC({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://bcjbagc.digirepub.com'),
   title: "佰草集 · 修源五行",
   description: "内养生机，年轻嘭弹 - 佰草集修源五行系列产品场景合成工具",
   keywords: ["佰草集", "HERBORIST", "修源五行", "护肤", "仙草", "中医美容"],
@@ -16,6 +17,22 @@ export const metadata: Metadata = {
   icons: {
     icon: "/logo.png",
     apple: "/logo.png",
+  },
+  openGraph: {
+    title: "佰草集 · 修源五行",
+    description: "内养生机，年轻嘭弹 - 五大仙草精粹护肤",
+    url: "https://bcjbagc.digirepub.com",
+    siteName: "佰草集修源五行",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "佰草集修源五行",
+      },
+    ],
+    locale: "zh_CN",
+    type: "website",
   },
 };
 

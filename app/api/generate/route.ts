@@ -4,6 +4,8 @@ import { generateProductImage, generateUGCCopy } from '@/lib/gemini'
 import { PRODUCTS } from '@/lib/constants'
 import fs from 'fs'
 import path from 'path'
+import { addRecord } from '@/lib/records'
+
 
 export async function POST(req: Request) {
     console.log('[API] Generate request received')

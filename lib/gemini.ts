@@ -39,7 +39,7 @@ export async function generateProductImage(
     const prompt = hasEnvironment
         ? `You are a MASTER COMMERCIAL PHOTOGRAPHER creating a premium skincare product image.
 
-BRAND: 佰草集 HERBORIST - ${productName}
+BRAND: Premium Skincare (Product: ${productName})
 PRODUCT SIZE: ${sizeInfo}
 
 INPUT IMAGES:
@@ -55,8 +55,9 @@ The product bottle in IMAGE 2 MUST be reproduced with EXACT accuracy:
 - Color scheme must be PRECISE
 - Cap/lid design must match EXACTLY
 - DO NOT alter, redesign, or "improve" the product appearance
-- Treat IMAGE 1 as a sacred reference - copy it faithfully
-- **DO NOT** add any text, logos, or watermarks. The image should be clean.
+- Treat IMAGE 1 as a sacred reference - copy the bottle faithfully
+- **ABSOLUTELY NO TEXT OR LOGOS**: The entire image (background, surface, overlay) must be 100% free of text, letters, characters, logos, or watermarks.
+- **CLEAN BACKGROUND**: Do not add any "Herborist" text or Chinese characters to the background.
 
 ═══════════════════════════════════════════════════
 YOUR TASK: CREATE A PROFESSIONAL PRODUCT PHOTOGRAPH
@@ -96,14 +97,14 @@ ALL elements share the SAME light source. Shadows point SAME direction.
 STEP 6: DEPTH OF FIELD
 Product and herbs: SHARP. Background: naturally BLURRED (f/2.8-f/4).
 
-STEP 7: LOGO
-Place LOGO from IMAGE 1 in TOP LEFT corner, 15-20% width.
+STEP 7: CLEAN OUTPUT
+- FINAL CHECK: Ensure there is ZERO text, NO logos, and NO watermarks in the final image. We will add the logo programmatically.
 
 OUTPUT: 1:1 ratio photorealistic product image.`
 
         : `You are a MASTER COMMERCIAL PHOTOGRAPHER creating a premium skincare product image with a DREAMY BACKGROUND.
 
-BRAND: 佰草集 HERBORIST - ${productName}
+BRAND: Premium Skincare - ${productName}
 PRODUCT SIZE: ${sizeInfo}
 
 INPUT IMAGES:
@@ -118,7 +119,8 @@ The product bottle in IMAGE 1 MUST be reproduced with EXACT accuracy:
 - Color scheme must be PRECISE
 - Cap/lid design must match EXACTLY
 - DO NOT alter, redesign, or "improve" the product appearance
-- **DO NOT** add any text, logos, or watermarks.
+- **ABSOLUTELY NO TEXT OR LOGOS**: The entire image must be 100% free of text, letters, characters, logos, or watermarks.
+- **CLEAN BACKGROUND**: Do not add any "Herborist" text or Chinese characters.
 
 ═══════════════════════════════════════════════════
 YOUR TASK: CREATE BACKGROUND + PRODUCT IMAGE
@@ -159,8 +161,8 @@ ALL elements share ONE light source from the background you created.
 STEP 5: DEPTH OF FIELD
 Product and herbs: SHARP FOCUS. Background: naturally BLURRED.
 
-STEP 6: LOGO
-Place LOGO from IMAGE 1 in TOP LEFT corner, 15-20% width.
+STEP 6: CLEAN OUTPUT
+- FINAL CHECK: Ensure there is ZERO text, NO logos, and NO watermarks.
 
 OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.`
 
@@ -191,7 +193,6 @@ OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.
                 body: JSON.stringify({
                     contents: [{
                         parts: [
-                            { text: prompt },
                             { text: prompt },
                             { inline_data: { mime_type: "image/jpeg", data: cleanProductBase64 } },
                             ...(hasEnvironment ? [{ inline_data: { mime_type: "image/jpeg", data: cleanEnvBase64 } }] : [])

@@ -10,6 +10,7 @@ import { EnvironmentUploader } from '@/components/EnvironmentUploader'
 import { Sparkles, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { compressImage } from '@/lib/client-compression'
+import FortuneLoading from '@/components/FortuneLoading'
 
 export default function HomePage() {
   const router = useRouter()
@@ -221,95 +222,9 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* Loading Overlay - 优化版 */}
+      {/* Loading Overlay - 本草灵签版 */}
       <AnimatePresence>
-        {isSubmitting && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-gradient-to-b from-[#1a1a1a] via-[#0f1510] to-[#1a1a1a] flex flex-col items-center justify-center px-8"
-          >
-            {/* 背景装饰 */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-herb-gold/5"
-              />
-              <motion.div
-                animate={{ rotate: -360 }}
-                transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full border border-herb-primary/10 border-dashed"
-              />
-            </div>
-
-            {/* 主要内容 */}
-            <div className="relative flex flex-col items-center justify-center max-w-sm w-full">
-              {/* Logo 动画 */}
-              <div className="relative w-20 h-20 mb-8">
-                <motion.div
-                  animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="w-full h-full"
-                >
-                  <Image src="/logo.png" alt="Loading" fill unoptimized className="object-contain" />
-                </motion.div>
-                {/* 发光效果 */}
-                <div className="absolute inset-0 bg-herb-gold/20 blur-2xl rounded-full -z-10" />
-              </div>
-
-              {/* 标题 */}
-              <h2 className="text-lg font-serif text-white/90 tracking-[0.15em] mb-2">
-                正在凝练东方美学
-              </h2>
-              {/* 动态故事文案 */}
-              <motion.p
-                key={
-                  realProgress < 20 ? "step1" :
-                    realProgress < 50 ? "step2" :
-                      realProgress < 80 ? "step3" : "step4"
-                }
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
-                className="text-herb-gold/80 text-xs tracking-widest mb-6 font-light min-h-[1.5em]"
-              >
-                {realProgress < 20 && "正在感知空间光影布局..."}
-                {realProgress >= 20 && realProgress < 50 && "甄选长白山人参等五行精粹..."}
-                {realProgress >= 50 && realProgress < 80 && "正在构筑现代隐士的生活意境..."}
-                {realProgress >= 80 && "注入内养生机，最后渲染中..."}
-              </motion.p>
-
-              {/* 进度条 */}
-              <div className="w-full bg-white/5 rounded-full h-1.5 mb-3 overflow-hidden">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-herb-gold/60 via-herb-gold to-herb-gold/60 rounded-full"
-                  animate={{ width: `${realProgress}%` }}
-                  transition={{ duration: 0.3 }}
-                />
-              </div>
-
-              {/* 进度百分比 */}
-              <div className="flex items-center justify-between text-white/40 text-[10px] tracking-wider mb-2">
-                <span>{realProgress}%</span>
-                <span>预计 {realProgress < 30 ? '30-40' : realProgress < 70 ? '20-30' : '10-20'} 秒</span>
-              </div>
-
-              {/* 底部提示 */}
-              <div className="mt-8 flex items-center gap-3 bg-white/5 rounded-full px-5 py-2.5 border border-white/5">
-                <div className="flex gap-0.5">
-                  <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0 }} className="w-1.5 h-1.5 bg-herb-gold/80 rounded-full" />
-                  <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }} className="w-1.5 h-1.5 bg-herb-gold/60 rounded-full" />
-                  <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }} className="w-1.5 h-1.5 bg-herb-gold/40 rounded-full" />
-                </div>
-                <span className="text-[10px] text-white/50 font-light tracking-wide">
-                  五大仙草 · 凝练精粹
-                </span>
-              </div>
-            </div>
-          </motion.div>
-        )}
+        {isSubmitting && <FortuneLoading />}
       </AnimatePresence>
     </div>
   )

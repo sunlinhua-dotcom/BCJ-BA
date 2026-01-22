@@ -1,3 +1,5 @@
+import copyLibraryData from '@/app/data/copy_library.json'
+
 /**
  * 佰草集修源五行 - Gemini API 集成
  * 使用 APIYI 代理调用 Gemini 模型
@@ -351,139 +353,22 @@ ${randomContext}
 - **280字左右**，专业但有趣，直接输出文案。`
 
     // ==========================================
-    // 强大的本地文案引擎 (Local Copy Engine)
-    // 当 API 失败时，使用此引擎生成不重复的文案
+    // 预生成的高定文案库 (Pre-generated API Copy Library)
+    // 用于作为 API 失败时的兜底，或直接作为高质量来源
     // ==========================================
 
-    const localTemplates = {
-        // 风格 A：大女主 / 职场 / 长期主义
-        styleA: {
-            hooks: [
-                "到了35岁，我不再相信“一夜回春”的鬼话，我只信奉“长期主义”带来的定力。",
-                "在名利场打滚久了，越发觉得：真正的奢侈品不是Logo，而是这种“掌控感”。",
-                "成年人的安全感，一半来自存款，一半来自皮肤的“稳”。",
-                "拒绝了无效社交，关掉了朋友圈，今晚只留给这瓶佰草集。",
-                "与其在焦虑中跟风刷酸，不如在稳扎稳打中重建秩序。"
-            ],
-            pains: [
-                "最近连轴转的项目让我身心俱疲，",
-                "看着镜子里因为熬夜而暗沉的脸色，",
-                "面对换季时的那点小情绪和泛红，",
-                "在飞这一趟跨洋航班的途中，",
-                "结束了一场极度消耗的谈判后，"
-            ],
-            solutions: [
-                "好在有这瓶佰草集修源五行${productName}。",
-                "是它接住了我所有的疲惫，佰草集修源五行${productName}。",
-                "我想到了老祖宗的智慧，拿出了这瓶${productName}。",
-                "随手拿起的这瓶${productName}，成了我的救命稻草。",
-                "幸好手边常备着这瓶修源五行${productName}。"
-            ],
-            benefits: [
-                "它不是那种浮于表面的修饰，而是一种深层的“支撑力”。人参的元气、灵芝的安稳，给了我最大的底气。",
-                "那种温润的包裹感，瞬间抚平了燥热。它不急不躁，一点点把我的好状态养回来。",
-                "没有猛药的刺激，只有润物细无声的滋养。第二天醒来，脸是软的，心是静的。",
-                "它像一个情绪稳定的老友，默默帮你修护屏障，筑起一道防线。",
-                "坚持用了半瓶，那种由内而外的透亮感，是装不出来的。"
-            ],
-            closings: [
-                "在这个不确定的世界里，拥有一张“稳”得住的脸，就是对生活最好的掌控。",
-                "流水不争先，争的是滔滔不绝。护肤如此，人生亦然。",
-                "你只管努力，剩下的交给时间，和它。",
-                "原来，从容才是一种最高级的美。",
-                "最好的投资，永远是投资自己。"
-            ]
-        },
+    const copyLibrary = copyLibraryData as Record<string, Record<string, string[]>>
 
-        // 风格 B：东方美学 / 隐士 / 治愈
-        styleB: {
-            hooks: [
-                "黄昏，点一盏灯，卸下一日的浮躁。",
-                "在万物速朽的时代，我们都需要一份源于自然的恒常。",
-                "雨后的清晨，空气里有泥土和草木的香气。",
-                "真正的养肤，其实是一场五感的修行。",
-                "慢下来，去感受一朵花开的时间。"
-            ],
-            pains: [
-                "指尖触碰到佰草集修源五行${productName}的温润，",
-                "打开瓶盖，那股淡淡的草药香若有似无，",
-                "取一泵${productName}于掌心预热，",
-                "当这瓶${productName}触肤的那一刻，",
-                "在这个快节奏的都市里，"
-            ],
-            solutions: [
-                "草本的香气若有似无地散开，是苦后的回甘，也是生活的隐喻。",
-                "仿佛置身于长白山的深林之中，呼吸都变得深沉了。",
-                "人参、灵芝、牡丹...这些天地的馈赠，此刻化作能量沁入肌理。",
-                "它没有化学香精的廉价感，只有大自然最本真的味道。",
-                "这不仅仅是护肤，更像是一场微型的仪式。"
-            ],
-            benefits: [
-                "这不是简单的涂抹，而是一次与肌肤的深度对话。",
-                "感觉每一个毛孔都在贪婪地呼吸，吸收着五行的灵气。",
-                "干燥、粗糙被一点点抚平，留下的只有如玉般的温润。",
-                "那种安心感，就像回到了小时候外婆的怀抱。",
-                "肌肤喝饱了水，透出一种像瓷器一样细腻的光泽。"
-            ],
-            closings: [
-                "心静了，世界就静了。脸也干净了。",
-                "于方寸之间，见天地辽阔。",
-                "这一刻，我找回了久违的自己。",
-                "美，本就是一种自然的平衡。",
-                "愿你也能在喧嚣中，修得这一份自在。"
-            ]
-        },
+    function getPreGeneratedCopy(productName: string, style: 'styleA' | 'styleB' | 'styleC'): string {
+        // 匹配产品名 (Constants里的名字和 key 可能有细微差别，做模糊匹配)
+        const productKey = Object.keys(copyLibrary).find(k => k.includes(productName) || productName.includes(k)) || '仙草霜'
 
-        // 风格 C：成分党 / 科学 / 简单易懂
-        styleC: {
-            hooks: [
-                "很多粉丝问我，为什么国货现在这么强？",
-                "别再盲目刷酸了，你的屏障可能正在“裸奔”。",
-                "护肤界的“特种兵”，我只服这一瓶。",
-                "扒了上百个配方，我发现了一个被低估的宝藏。",
-                "听一句劝：抗老不一定是猛药，维稳才是硬道理。"
-            ],
-            pains: [
-                "看这瓶佰草集修源五行${productName}就知道了。",
-                "直到我遇到了佰草集修源五行${productName}。",
-                "研究完${productName}的成分表，我直呼内行。",
-                "这瓶${productName}的思路非常超前。",
-                "如果你也是敏皮、熬夜党，一定要试试这个${productName}。"
-            ],
-            solutions: [
-                "别被“中草药”三个字吓退，它的逻辑非常现代——你可以把它想象成给皮肤细胞喝的“超级补剂”。",
-                "人参负责“充电”，让细胞干活更有劲；灵芝负责“维稳”，像灭火器一样按住炎症。",
-                "比起单一的化学成分，这种“五行组方”是更系统的整体调理，相当于给皮肤请了个中医团队。",
-                "专利微囊技术把活性成分包裹起来，直达肌底，完全不用担心不吸收。",
-                "五种顶级草本协同作用，比单一成分的效率高出好几倍。"
-            ],
-            benefits: [
-                "坚持用下来，你会发现脸不容易泛红了，那种由内而外透出来的光泽感，是皮肤真正“健康”的证明。",
-                "原本粗糙的颗粒感没了，摸上去像是剥了壳的鸡蛋。",
-                "法令纹虽然不会立刻消失，但整个脸确实“嘭”起来了。",
-                "换季的时候，只有它能让我安心。稳，就是最大的赢。",
-                "抗氧、修护、滋润，这一瓶全都给你包圆了。"
-            ],
-            closings: [
-                "成分党闭眼入，绝对不踩雷。",
-                "这才是真正适合中国宝宝体质的护肤品。",
-                "把脸交给他，我很放心。",
-                "不玩虚的，效果看得见。",
-                "相信我，用一次你就会爱上。"
-            ]
+        const styleTexts = copyLibrary[productKey]?.[style] || []
+        if (styleTexts.length === 0) {
+            return `佰草集${productName}，修护时光，遇见更美的自己。`
         }
-    }
 
-    function generateLocalCopy(productName: string, style: 'styleA' | 'styleB' | 'styleC'): string {
-        const t = localTemplates[style]
-        const hook = getRandomItem(t.hooks)
-        const pain = getRandomItem(t.pains)
-        const solution = getRandomItem(t.solutions)
-        const benefit = getRandomItem(t.benefits)
-        const closing = getRandomItem(t.closings)
-
-        const raw = `${hook}${pain}${solution}${benefit}${closing}`
-        return raw.replaceAll('${productName}', productName)
+        return getRandomItem(styleTexts)
     }
 
     // ----------------------------------------------------------------
@@ -508,9 +393,9 @@ ${randomContext}
     }
 
     const [styleA, styleB, styleC] = await Promise.all([
-        generateOne(promptStyleA, generateLocalCopy(productName, 'styleA')),
-        generateOne(promptStyleB, generateLocalCopy(productName, 'styleB')),
-        generateOne(promptStyleC, generateLocalCopy(productName, 'styleC'))
+        generateOne(promptStyleA, getPreGeneratedCopy(productName, 'styleA')),
+        generateOne(promptStyleB, getPreGeneratedCopy(productName, 'styleB')),
+        generateOne(promptStyleC, getPreGeneratedCopy(productName, 'styleC'))
     ])
 
     console.log('[Gemini] 3-style copy generation complete')

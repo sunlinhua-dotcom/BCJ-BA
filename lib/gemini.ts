@@ -43,8 +43,9 @@ BRAND: Premium Skincare (Product: ${productName})
 PRODUCT SIZE: ${sizeInfo}
 
 INPUT IMAGES:
-- IMAGE 1: Product bottle (${sizeInfo}) - MUST BE REPRODUCED EXACTLY
+- IMAGE 1: Product bottle (${sizeInfo}) - Shape Reference
 - IMAGE 2: Environment scene (your shooting location)
+- IMAGE 3: High-Res Brand Logo (Reference for bottle details)
 
 ═══════════════════════════════════════════════════
 ⚠️ CRITICAL: PRODUCT ACCURACY
@@ -55,9 +56,10 @@ The product bottle in IMAGE 2 MUST be reproduced with EXACT accuracy:
 - Color scheme must be PRECISE
 - Cap/lid design must match EXACTLY
 - DO NOT alter, redesign, or "improve" the product appearance
-- Treat IMAGE 1 as a sacred reference - copy the bottle faithfully
+- Treat IMAGE 1 as a sacred reference for SHAPE and FORM.
+- **RESTORE LOGO**: The logo on the bottle in IMAGE 1 might be low-res. Use the distinct details from **IMAGE 3** to render the branding on the bottle sharply and accurately.
+- **PERSPECTIVE**: Apply the logo (from Image 3) onto the curved surface of the bottle naturally.
 - **NO FLOATING TEXT**: Do not add random text, watermarks, or logos to the background or corners.
-- **PROTECT PRODUCT LABEL**: The text/logo ON THE BOTTLE itself (from IMAGE 1) MUST BE PRESERVED. Do not erase the product branding.
 
 ═══════════════════════════════════════════════════
 YOUR TASK: CREATE A PROFESSIONAL PRODUCT PHOTOGRAPH
@@ -108,7 +110,8 @@ BRAND: Premium Skincare - ${productName}
 PRODUCT SIZE: ${sizeInfo}
 
 INPUT IMAGES:
-- IMAGE 1: Product bottle (${sizeInfo}) - MUST BE REPRODUCED EXACTLY
+- IMAGE 1: Product bottle (${sizeInfo}) - Shape Reference
+- IMAGE 2: High-Res Brand Logo (Reference for bottle details)
 
 ═══════════════════════════════════════════════════
 ⚠️ CRITICAL: PRODUCT ACCURACY
@@ -119,8 +122,9 @@ The product bottle in IMAGE 1 MUST be reproduced with EXACT accuracy:
 - Color scheme must be PRECISE
 - Cap/lid design must match EXACTLY
 - DO NOT alter, redesign, or "improve" the product appearance
+- **RESTORE LOGO**: The logo on the bottle in IMAGE 1 might be low-res. Use **IMAGE 2** (High-Res Logo) to render the branding on the bottle strictly and sharply.
+- **PERSPECTIVE**: Apply the logo (from Image 2) onto the curved surface of the bottle naturally.
 - **NO FLOATING TEXT**: Do not add random text, watermarks, or logos to the background or corners.
-- **PROTECT PRODUCT LABEL**: The text/logo ON THE BOTTLE itself (from IMAGE 1) MUST BE PRESERVED. Do not erase the product branding.
 
 ═══════════════════════════════════════════════════
 YOUR TASK: CREATE BACKGROUND + PRODUCT IMAGE
@@ -166,7 +170,7 @@ STEP 6: CLEAN OUTPUT
 - Ensure the product label text is visible and sharp.
 OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.`
 
-    // const cleanLogoBase64 = logoBase64.replace(/^data:image\/\w+;base64,/, '') (Unused)
+    const cleanLogoBase64 = logoBase64 ? logoBase64.replace(/^data:image\/\w+;base64,/, '') : ''
     const cleanProductBase64 = productBase64.replace(/^data:image\/\w+;base64,/, '')
     const cleanEnvBase64 = hasEnvironment ? envBase64.replace(/^data:image\/\w+;base64,/, '') : ''
 
@@ -195,7 +199,8 @@ OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.
                         parts: [
                             { text: prompt },
                             { inline_data: { mime_type: "image/jpeg", data: cleanProductBase64 } },
-                            ...(hasEnvironment ? [{ inline_data: { mime_type: "image/jpeg", data: cleanEnvBase64 } }] : [])
+                            ...(hasEnvironment ? [{ inline_data: { mime_type: "image/jpeg", data: cleanEnvBase64 } }] : []),
+                            ...(cleanLogoBase64 ? [{ inline_data: { mime_type: "image/png", data: cleanLogoBase64 } }] : [])
                         ]
                     }],
                     generationConfig: {

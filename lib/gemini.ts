@@ -7,8 +7,9 @@ import path from 'path'
  */
 
 const API_KEY = process.env.GEMINI_API_KEY || 'sk-g8JehwXjfoWKeHxvDdAe2277FeA24c0094B7E6Fe5566346b'
+const TEXT_API_KEY = process.env.TEXT_API_KEY || 'sk-73hmLlh49czsaX0n4259C2BbF70c438dBb009f12Fe8aCa28'
 const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-3-pro-image-preview'
-const TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-1.5-pro'
+const TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-3-flash-preview'
 const BASE_URL = process.env.GEMINI_BASE_URL || 'https://api.apiyi.com/v1beta'
 
 /**
@@ -391,7 +392,7 @@ ${randomContext}
         try {
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+                headers: { 'Authorization': `Bearer ${TEXT_API_KEY}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
                     generationConfig: { temperature: 0.9, maxOutputTokens: 1024 }

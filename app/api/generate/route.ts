@@ -33,9 +33,11 @@ export async function POST(req: Request) {
         let logoBase64 = ''
         try {
             const rawLogoBuffer = fs.readFileSync(logoPath)
-            // 不缩放，直接给原图或稍作压缩
+            // 优化 1：输入端极速压缩 (Strategy 1)
+            // Logo 只需要参考轮廓和文字，512px 足够清晰
             const processedLogo = await sharp(rawLogoBuffer)
-                .resize(500, null) // 限制一下大小，避免 token 浪费
+                .resize(512, null, { withoutEnlargement: true })
+                .png({ quality: 60, compressionLevel: 9 }) // 强力压缩
                 .toBuffer()
             logoBase64 = processedLogo.toString('base64')
             console.log('[API] Logo prepared as reference')
@@ -48,9 +50,10 @@ export async function POST(req: Request) {
         const productBuffer = fs.readFileSync(productImagePath)
         let processedProductBuffer: Buffer
         try {
+            // 优化 1：产品图缩小至 512px，质量 60
             processedProductBuffer = await sharp(productBuffer)
-                .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
-                .jpeg({ quality: 75 })
+                .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
+                .jpeg({ quality: 60, mozjpeg: true }) // 使用 mozjpeg 算法获得更小体积
                 .toBuffer()
         } catch (e) {
             console.warn('[API] Product compression failed:', e)
@@ -64,9 +67,10 @@ export async function POST(req: Request) {
             const envBuffer = Buffer.from(await envFile.arrayBuffer())
             let processedEnvBuffer: Buffer
             try {
+                // 优化 1：环境图同样缩小至 512px
                 processedEnvBuffer = await sharp(envBuffer)
-                    .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
-                    .jpeg({ quality: 75 })
+                    .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
+                    .jpeg({ quality: 60, mozjpeg: true })
                     .toBuffer()
                 envBase64 = processedEnvBuffer.toString('base64')
                 console.log('[API] Env compressed:', (processedEnvBuffer.length / 1024).toFixed(0), 'KB')

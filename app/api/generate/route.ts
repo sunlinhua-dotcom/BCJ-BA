@@ -28,8 +28,22 @@ export async function POST(req: Request) {
         }
 
 
+        // 2. 准备 Logo (作为 AI 参考图，非合成)
+        const logoPath = path.join(process.cwd(), 'public', 'logo.png')
+        let logoBase64 = ''
+        try {
+            const rawLogoBuffer = fs.readFileSync(logoPath)
+            // 不缩放，直接给原图或稍作压缩
+            const processedLogo = await sharp(rawLogoBuffer)
+                .resize(500, null) // 限制一下大小，避免 token 浪费
+                .toBuffer()
+            logoBase64 = processedLogo.toString('base64')
+            console.log('[API] Logo prepared as reference')
+        } catch (e) {
+            console.warn('[API] Failed to load logo:', e)
+        }
 
-        // 2. 准备产品图片 (AI 参考图)
+        // 3. 准备产品图片 (AI 参考图)
         const productImagePath = path.join(process.cwd(), 'public', 'products-ai', `${productId}.png`)
         const productBuffer = fs.readFileSync(productImagePath)
         let processedProductBuffer: Buffer
@@ -66,10 +80,9 @@ export async function POST(req: Request) {
 
         console.log('[API] Starting parallel generation...')
 
-        // 4. 并行生成：图片（纯净无Logo） + 文案
-        // generateProductImage 第一个参数现在传空字符串，因为不再需要 Logo
+        // 4. 并行生成：图片（含 Logo 修复指令） + 文案
         const [rawImageBase64, copyResult] = await Promise.all([
-            generateProductImage('', productBase64, envBase64, product.name),
+            generateProductImage(logoBase64, productBase64, envBase64, product.name),
             generateUGCCopy(product.name)
         ])
 

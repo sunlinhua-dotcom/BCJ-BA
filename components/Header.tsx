@@ -19,7 +19,7 @@ export default function Header() {
                 {/* Logo - 视觉核心 */}
                 <div className="relative w-[130px] h-[65px] flex-shrink-0 drop-shadow-sm filter contrast-[1.05]">
                     <Image
-                        src="/logo.png"
+                        src="/logo-opt.png"
                         alt="佰草集 HERBORIST"
                         fill
                         className="object-contain scale-110"

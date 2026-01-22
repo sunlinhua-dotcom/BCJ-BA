@@ -26,7 +26,7 @@ export function ProductSelector({ selectedProduct, onSelect }: ProductSelectorPr
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-                {PRODUCTS.map((product) => {
+                {PRODUCTS.map((product, index) => {
                     const isSelected = selectedProduct === product.id
                     return (
                         <button
@@ -53,6 +53,7 @@ export function ProductSelector({ selectedProduct, onSelect }: ProductSelectorPr
                                         alt={product.name}
                                         fill
                                         unoptimized
+                                        priority={index < 2}
                                         className={`
                                             object-contain drop-shadow-xl transition-all duration-700
                                             ${isSelected ? 'scale-110 saturate-110' : 'scale-95 saturate-[0.85] opacity-90 group-hover:scale-100 group-hover:opacity-100'}

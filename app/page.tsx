@@ -184,61 +184,86 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* Loading Overlay */}
+      {/* Loading Overlay - 优化版 */}
       <AnimatePresence>
         {isSubmitting && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center px-8"
+            className="fixed inset-0 z-50 bg-gradient-to-b from-[#1a1a1a] via-[#0f1510] to-[#1a1a1a] flex flex-col items-center justify-center px-8"
           >
-            {/* Animated Brand Loading */}
-            <div className="flex flex-col items-center justify-center">
-              <div className="relative w-24 h-24 mb-6">
+            {/* 背景装饰 */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-herb-gold/5"
+              />
+              <motion.div
+                animate={{ rotate: -360 }}
+                transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full border border-herb-primary/10 border-dashed"
+              />
+            </div>
+
+            {/* 主要内容 */}
+            <div className="relative flex flex-col items-center justify-center max-w-sm w-full">
+              {/* Logo 动画 */}
+              <div className="relative w-20 h-20 mb-8">
                 <motion.div
-                  animate={{
-                    scale: [1, 1.1, 1],
-                    opacity: [0.5, 1, 0.5]
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  className="w-full h-full relative"
+                  animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="w-full h-full"
                 >
-                  <Image
-                    src="/logo-new.png"
-                    alt="Loading"
-                    fill
-                    unoptimized
-                    className="object-contain"
-                  />
+                  <Image src="/logo-new.png" alt="Loading" fill unoptimized className="object-contain" />
                 </motion.div>
-                {/* 装饰圆环 */}
+                {/* 发光效果 */}
+                <div className="absolute inset-0 bg-herb-gold/20 blur-2xl rounded-full -z-10" />
+              </div>
+
+              {/* 标题 */}
+              <h2 className="text-lg font-serif text-white/90 tracking-[0.15em] mb-2">
+                正在凝练东方美学
+              </h2>
+              <p className="text-herb-gold/60 text-xs tracking-wider mb-6 font-light">
+                {progress === '正在压缩图片...' ? '准备素材中...' :
+                  progress === '正在上传至服务器...' ? '上传图片中...' :
+                    progress === 'AI正在创作中...' ? 'AI 融合仙草精粹...' : 'Processing...'}
+              </p>
+
+              {/* 进度条 */}
+              <div className="w-full bg-white/5 rounded-full h-1.5 mb-3 overflow-hidden">
                 <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-[-20%] border border-herb-gold/20 rounded-full border-dashed"
+                  className="h-full bg-gradient-to-r from-herb-gold/60 via-herb-gold to-herb-gold/60 rounded-full"
+                  initial={{ width: "0%" }}
+                  animate={{
+                    width: progress === '正在压缩图片...' ? "15%" :
+                      progress === '正在上传至服务器...' ? "35%" :
+                        progress === 'AI正在创作中...' ? "85%" : "5%"
+                  }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
                 />
               </div>
 
-              <h2 className="text-xl font-serif text-white tracking-widest mb-2">
-                正在凝练东方美学
-              </h2>
-              <p className="text-herb-accent/80 text-xs tracking-wider mb-8 uppercase font-light">
-                {progress || 'AI Generating...'}
-              </p>
+              {/* 预计时间 */}
+              <div className="flex items-center gap-2 text-white/40 text-[10px] tracking-wider">
+                <motion.span
+                  animate={{ opacity: [0.4, 1, 0.4] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >●</motion.span>
+                <span>预计 20-40 秒</span>
+              </div>
 
-              <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-6 py-2 flex items-center gap-3">
-                <div className="flex gap-1">
-                  <motion.div animate={{ height: [4, 12, 4] }} transition={{ duration: 1, repeat: Infinity, delay: 0 }} className="w-1 bg-herb-gold rounded-full" />
-                  <motion.div animate={{ height: [4, 12, 4] }} transition={{ duration: 1, repeat: Infinity, delay: 0.2 }} className="w-1 bg-herb-gold rounded-full" />
-                  <motion.div animate={{ height: [4, 12, 4] }} transition={{ duration: 1, repeat: Infinity, delay: 0.4 }} className="w-1 bg-herb-gold rounded-full" />
+              {/* 底部提示 */}
+              <div className="mt-8 flex items-center gap-3 bg-white/5 rounded-full px-5 py-2.5 border border-white/5">
+                <div className="flex gap-0.5">
+                  <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0 }} className="w-1.5 h-1.5 bg-herb-gold/80 rounded-full" />
+                  <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }} className="w-1.5 h-1.5 bg-herb-gold/60 rounded-full" />
+                  <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }} className="w-1.5 h-1.5 bg-herb-gold/40 rounded-full" />
                 </div>
-                <span className="text-xs text-white/60 font-light pl-2 border-l border-white/10">
-                  请耐心等待创作
+                <span className="text-[10px] text-white/50 font-light tracking-wide">
+                  五大仙草 · 凝练精粹
                 </span>
               </div>
             </div>

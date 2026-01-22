@@ -25,18 +25,32 @@ export async function generateProductImage(
     console.log('[Gemini] Starting product image generation for:', productName)
     console.log('[Gemini] API Key exists:', !!API_KEY)
 
-    // 精简提示词加速处理
+    // 精简提示词加速处理，加入五大仙草元素
     const prompt = `Create a premium skincare product photo for 佰草集 HERBORIST ${productName}.
 
 INPUT: 3 images - (1) Brand LOGO, (2) Product bottle, (3) Environment scene.
 
-REQUIREMENTS:
-- Place LOGO in top-left or bottom-right corner as watermark (15-20% width, clear but not blocking product)
-- Product from IMAGE 2 is the hero - large, sharp, centered
-- Use IMAGE 3 as blurred atmospheric background
-- Match product lighting with environment mood
-- High-end commercial photography style, oriental zen aesthetic
-- Output: 1:1 ratio product poster with LOGO, product, and environment blended naturally.`
+CRITICAL REQUIREMENTS:
+1. LOGO: Place in top-left or bottom-right corner as watermark (15-20% width)
+2. PRODUCT: Center hero, large and sharp with clear label
+3. ENVIRONMENT: Use IMAGE 3 as blurred atmospheric background
+
+DECORATIVE ELEMENTS (MUST INCLUDE):
+Naturally arrange these 5 sacred herbs around the product:
+- 长白山人参 (Ginseng roots with fine tendrils and leaves)
+- 灵芝 (Whole Lingzhi/Reishi mushroom cap)
+- 牡丹籽 (Peony petals and seeds)
+- 紫苏籽 (Purple perilla leaves and seeds)
+- 北五味子 (Red Schisandra berry clusters)
+
+These elements should:
+- Float elegantly around the product, not cover it
+- Be soft-focused/semi-transparent for depth
+- Create an oriental herbal aesthetic atmosphere
+- Match the environment lighting
+
+STYLE: High-end commercial photography, oriental zen, luxury spa feeling.
+OUTPUT: 1:1 product poster with LOGO, product, herbs, and environment blended naturally.`
 
     const cleanLogoBase64 = logoBase64.replace(/^data:image\/\w+;base64,/, '')
     const cleanProductBase64 = productBase64.replace(/^data:image\/\w+;base64,/, '')

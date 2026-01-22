@@ -400,13 +400,12 @@ ${randomContext}
         } catch { return fallback }
     }
 
-    const [styleA, styleB, styleC] = await Promise.all([
-        generateOne(promptStyleA, getPreGeneratedCopy(productName, 'styleA')),
-        generateOne(promptStyleB, getPreGeneratedCopy(productName, 'styleB')),
-        generateOne(promptStyleC, getPreGeneratedCopy(productName, 'styleC'))
-    ])
+    // 直接使用本地文案库（API 不稳定，暂时禁用）
+    const styleA = getPreGeneratedCopy(productName, 'styleA')
+    const styleB = getPreGeneratedCopy(productName, 'styleB')
+    const styleC = getPreGeneratedCopy(productName, 'styleC')
 
-    console.log('[Gemini] 3-style copy generation complete')
+    console.log('[Gemini] 3-style copy generation complete (using local library)')
     return { styleA, styleB, styleC }
 }
 

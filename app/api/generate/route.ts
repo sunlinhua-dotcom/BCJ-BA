@@ -25,42 +25,46 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "无效的产品选择" }, { status: 400 })
         }
 
-        // 读取品牌 LOGO
+        // 读取品牌 LOGO 并压缩
         const logoPath = path.join(process.cwd(), 'public', 'herborist-logo.png')
         const logoBuffer = fs.readFileSync(logoPath)
-        const logoBase64 = logoBuffer.toString('base64')
-        console.log('[API] Logo loaded, size:', logoBuffer.length)
+        const compressedLogo = await sharp(logoBuffer)
+            .resize(300, 300, { fit: 'inside', withoutEnlargement: true })
+            .png({ quality: 70 })
+            .toBuffer()
+        const logoBase64 = compressedLogo.toString('base64')
+        console.log('[API] Logo compressed:', (compressedLogo.length / 1024).toFixed(0), 'KB')
 
-        // 读取产品图片并转为 Base64
+        // 读取产品图片并压缩 - 降至 800px 加速传输
         const productImagePath = path.join(process.cwd(), 'public', 'products', `${productId}.webp`)
         const productBuffer = fs.readFileSync(productImagePath)
-
-        // 使用 sharp 压缩产品图
         let processedProductBuffer: Buffer
         try {
             processedProductBuffer = await sharp(productBuffer)
-                .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
-                .jpeg({ quality: 85 })
+                .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
+                .jpeg({ quality: 75 })
                 .toBuffer()
         } catch (e) {
-            console.warn('[API] Product image compression failed, using original:', e)
+            console.warn('[API] Product compression failed:', e)
             processedProductBuffer = productBuffer
         }
         const productBase64 = processedProductBuffer.toString('base64')
+        console.log('[API] Product compressed:', (processedProductBuffer.length / 1024).toFixed(0), 'KB')
 
-        // 处理环境图
+        // 处理环境图 - 同样降至 800px
         const envBuffer = Buffer.from(await envFile.arrayBuffer())
         let processedEnvBuffer: Buffer
         try {
             processedEnvBuffer = await sharp(envBuffer)
-                .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
-                .jpeg({ quality: 80 })
+                .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
+                .jpeg({ quality: 70 })
                 .toBuffer()
         } catch (e) {
-            console.warn('[API] Environment image compression failed, using original:', e)
+            console.warn('[API] Env compression failed:', e)
             processedEnvBuffer = envBuffer
         }
         const envBase64 = processedEnvBuffer.toString('base64')
+        console.log('[API] Env compressed:', (processedEnvBuffer.length / 1024).toFixed(0), 'KB')
 
         console.log('[API] Images compressed, starting parallel generation...')
 

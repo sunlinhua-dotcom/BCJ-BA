@@ -25,46 +25,18 @@ export async function generateProductImage(
     console.log('[Gemini] Starting product image generation for:', productName)
     console.log('[Gemini] API Key exists:', !!API_KEY)
 
-    const prompt = `
-    ROLE: World-Class Commercial Skincare Product Photographer & Visual Designer.
-    
-    BRAND: 佰草集 HERBORIST - 修源五行系列
-    PRODUCT: ${productName}
-    
-    YOU HAVE 3 REFERENCE IMAGES:
-    - IMAGE 1: 品牌 LOGO (佰草集 HERBORIST 标识)
-    - IMAGE 2: 产品图 (Product - ${productName})
-    - IMAGE 3: 环境图 (Environment/Scene)
-    
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    CRITICAL REQUIREMENTS:
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    
-    1. 【LOGO 放置 - 最重要】
-       - 必须在最终图片中包含 IMAGE 1 中的品牌 LOGO
-       - LOGO 应放置在图片的**左上角或右下角**，作为品牌水印
-       - LOGO 保持原有比例，大小适中（约占图片宽度的 15-20%）
-       - LOGO 要清晰可见，但不遮挡产品主体
-       - 可以加一层淡淡的投影让 LOGO 更融入画面
-    
-    2. 【产品为主角】
-       - IMAGE 2 中的产品必须是整个画面的绝对核心
-       - 产品要大、清晰、完整展示标签和细节
-       - 产品光影要与环境光一致
-    
-    3. 【环境融合】
-       - 使用 IMAGE 3 作为背景氛围
-       - 提取环境的光影色调，让产品仿佛真实置身其中
-       - 可以虚化背景，突出产品
-    
-    4. 【品质要求】
-       - 高端商业摄影级别的输出
-       - 东方美学 + 现代简约
-       - 无明显合成痕迹
-       - 画面干净、高级、有质感
-    
-    OUTPUT: 一张包含品牌 LOGO、产品主体、环境氛围的高端商业产品海报。
-    `
+    // 精简提示词加速处理
+    const prompt = `Create a premium skincare product photo for 佰草集 HERBORIST ${productName}.
+
+INPUT: 3 images - (1) Brand LOGO, (2) Product bottle, (3) Environment scene.
+
+REQUIREMENTS:
+- Place LOGO in top-left or bottom-right corner as watermark (15-20% width, clear but not blocking product)
+- Product from IMAGE 2 is the hero - large, sharp, centered
+- Use IMAGE 3 as blurred atmospheric background
+- Match product lighting with environment mood
+- High-end commercial photography style, oriental zen aesthetic
+- Output: 1:1 ratio product poster with LOGO, product, and environment blended naturally.`
 
     const cleanLogoBase64 = logoBase64.replace(/^data:image\/\w+;base64,/, '')
     const cleanProductBase64 = productBase64.replace(/^data:image\/\w+;base64,/, '')

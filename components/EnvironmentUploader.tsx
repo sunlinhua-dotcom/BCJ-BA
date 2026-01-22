@@ -58,9 +58,7 @@ export function EnvironmentUploader({ file, onFileChange }: EnvironmentUploaderP
                 {!file ? (
                     <motion.div
                         key="empty"
-                        initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
                         onDragOver={handleDragOver}
                         onDragLeave={() => setIsDragging(false)}
                         onDrop={handleDrop}
@@ -112,7 +110,6 @@ export function EnvironmentUploader({ file, onFileChange }: EnvironmentUploaderP
                 ) : (
                     <motion.div
                         key="preview"
-                        initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="relative h-48 rounded-[20px] overflow-hidden shadow-xl shadow-[#8B7355]/10 ring-1 ring-white group"
                     >

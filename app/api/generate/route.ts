@@ -100,6 +100,20 @@ export async function POST(req: Request) {
             .toBuffer()
 
         const finalImageBase64 = finalImageBuffer.toString('base64')
+        // 6. 记录生成日志
+        try {
+            const record = {
+                timestamp: new Date().toISOString(),
+                productId: product.id,
+                hasEnv: !!envFile,
+                imageSizeKB: Math.round(Buffer.from(finalImageBase64, 'base64').length / 1024),
+                copyTexts: copyResult
+            }
+            addRecord(record)
+        } catch (e) {
+            console.error('[API] Failed to log record:', e)
+        }
+
         console.log('[API] Generation & Composition complete!')
 
         return NextResponse.json({

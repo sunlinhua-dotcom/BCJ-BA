@@ -33,11 +33,10 @@ export async function POST(req: Request) {
         let logoBase64 = ''
         try {
             const rawLogoBuffer = fs.readFileSync(logoPath)
-            // 优化 1：输入端极速压缩 (Strategy 1)
-            // Logo 只需要参考轮廓和文字，512px 足够清晰
+            // Logo: 保持 512px 但提高质量，确保文字清晰作为参考
             const processedLogo = await sharp(rawLogoBuffer)
                 .resize(512, null, { withoutEnlargement: true })
-                .png({ quality: 60, compressionLevel: 9 }) // 强力压缩
+                .png({ quality: 90, compressionLevel: 9 })
                 .toBuffer()
             logoBase64 = processedLogo.toString('base64')
             console.log('[API] Logo prepared as reference')
@@ -50,10 +49,10 @@ export async function POST(req: Request) {
         const productBuffer = fs.readFileSync(productImagePath)
         let processedProductBuffer: Buffer
         try {
-            // 优化 1：产品图缩小至 512px，质量 60
+            // 修正：产品图必须高清 (800px + Q95)，否则 AI 会丢失颜色细节导致"发白"
             processedProductBuffer = await sharp(productBuffer)
-                .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
-                .jpeg({ quality: 60, mozjpeg: true }) // 使用 mozjpeg 算法获得更小体积
+                .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
+                .jpeg({ quality: 95, mozjpeg: true })
                 .toBuffer()
         } catch (e) {
             console.warn('[API] Product compression failed:', e)
@@ -67,10 +66,10 @@ export async function POST(req: Request) {
             const envBuffer = Buffer.from(await envFile.arrayBuffer())
             let processedEnvBuffer: Buffer
             try {
-                // 优化 1：环境图同样缩小至 512px
+                // 环境图：保持 512px 适度压缩 (Q75)，背景稍微模糊不影响
                 processedEnvBuffer = await sharp(envBuffer)
                     .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
-                    .jpeg({ quality: 60, mozjpeg: true })
+                    .jpeg({ quality: 75, mozjpeg: true })
                     .toBuffer()
                 envBase64 = processedEnvBuffer.toString('base64')
                 console.log('[API] Env compressed:', (processedEnvBuffer.length / 1024).toFixed(0), 'KB')

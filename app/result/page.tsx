@@ -206,35 +206,41 @@ export default function ResultPage() {
                     </div>
                 </motion.div>
 
-                {/* 操作按钮组 */}
+                {/* 操作按钮组 - 3个按钮 */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="grid grid-cols-2 gap-4 pt-2"
+                    className="space-y-3 pt-2"
                 >
+                    {/* 保存图片 - 主按钮 */}
                     <button
                         onClick={handleDownload}
-                        className="h-14 rounded-full bg-gradient-to-r from-herb-dark to-[#3D5A43] text-white font-medium flex items-center justify-center gap-2 shadow-lg shadow-herb-dark/20 active:scale-[0.98] transition-all"
+                        className="w-full h-14 rounded-full bg-gradient-to-r from-herb-dark to-[#3D5A43] text-white font-medium flex items-center justify-center gap-2 shadow-lg shadow-herb-dark/20 active:scale-[0.98] transition-all"
                     >
                         <Download size={18} />
                         <span className="tracking-widest text-sm">保存图片</span>
                     </button>
 
-                    <button
-                        onClick={() => router.push('/')}
-                        className="h-14 rounded-full bg-white text-herb-dark font-medium flex items-center justify-center gap-2 border border-herb-gold/30 shadow-sm active:scale-[0.98] transition-all"
-                    >
-                        {/* Share or Retry logic mixed here, simplifying to 'Home' as per design consistency, or use Share if available */}
-                        {typeof navigator !== 'undefined' && 'share' in navigator ? (
-                            <span className="flex items-center gap-2" onClick={(e) => { e.stopPropagation(); handleShare(); }}>
-                                <Share2 size={18} />
-                                <span className="tracking-widest text-sm">分享结果</span>
-                            </span>
-                        ) : (
-                            <span className="tracking-widest text-sm">再来一张</span>
+                    {/* 次要按钮组 */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <button
+                            onClick={() => router.push('/')}
+                            className="h-12 rounded-full bg-white text-herb-dark font-medium flex items-center justify-center gap-2 border border-herb-gold/30 shadow-sm active:scale-[0.98] transition-all"
+                        >
+                            <span className="tracking-wider text-sm">继续生成</span>
+                        </button>
+
+                        {typeof navigator !== 'undefined' && 'share' in navigator && (
+                            <button
+                                onClick={handleShare}
+                                className="h-12 rounded-full bg-white text-herb-dark font-medium flex items-center justify-center gap-2 border border-herb-gold/30 shadow-sm active:scale-[0.98] transition-all"
+                            >
+                                <Share2 size={16} />
+                                <span className="tracking-wider text-sm">分享</span>
+                            </button>
                         )}
-                    </button>
+                    </div>
                 </motion.div>
             </div>
         </div>

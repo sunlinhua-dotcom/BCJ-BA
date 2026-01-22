@@ -15,8 +15,8 @@ export async function POST(req: Request) {
 
         console.log('[API] Request params:', { productId, hasEnvFile: !!envFile })
 
-        if (!productId || !envFile) {
-            return NextResponse.json({ error: "缺少产品选择或环境图" }, { status: 400 })
+        if (!productId) {
+            return NextResponse.json({ error: "缺少产品选择" }, { status: 400 })
         }
 
         // 获取产品信息
@@ -25,15 +25,21 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "无效的产品选择" }, { status: 400 })
         }
 
-        // 读取品牌 LOGO 并压缩
-        const logoPath = path.join(process.cwd(), 'public', 'herborist-logo.png')
-        const logoBuffer = fs.readFileSync(logoPath)
-        const compressedLogo = await sharp(logoBuffer)
-            .resize(300, 300, { fit: 'inside', withoutEnlargement: true })
-            .png({ quality: 70 })
-            .toBuffer()
-        const logoBase64 = compressedLogo.toString('base64')
-        console.log('[API] Logo compressed:', (compressedLogo.length / 1024).toFixed(0), 'KB')
+        // 读取品牌 LOGO 并压缩 (使用新的 logo.png)
+        const logoPath = path.join(process.cwd(), 'public', 'logo.png')
+        let logoBase64: string
+        try {
+            const logoBuffer = fs.readFileSync(logoPath)
+            const compressedLogo = await sharp(logoBuffer)
+                .resize(300, 300, { fit: 'inside', withoutEnlargement: true })
+                .png({ quality: 70 })
+                .toBuffer()
+            logoBase64 = compressedLogo.toString('base64')
+            console.log('[API] Logo compressed:', (compressedLogo.length / 1024).toFixed(0), 'KB')
+        } catch (e) {
+            console.error('[API] Failed to load logo:', e)
+            throw new Error('服务器缺少 Logo 文件')
+        }
 
         // 读取产品图片（AI 专用参考图，与页面展示图分开）
         const productImagePath = path.join(process.cwd(), 'public', 'products-ai', `${productId}.png`)
@@ -52,20 +58,27 @@ export async function POST(req: Request) {
         const productBase64 = processedProductBuffer.toString('base64')
         console.log('[API] Product compressed:', (processedProductBuffer.length / 1024).toFixed(0), 'KB')
 
-        // 处理环境图 - 同样降至 800px
-        const envBuffer = Buffer.from(await envFile.arrayBuffer())
-        let processedEnvBuffer: Buffer
-        try {
-            processedEnvBuffer = await sharp(envBuffer)
-                .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
-                .jpeg({ quality: 70 })
-                .toBuffer()
-        } catch (e) {
-            console.warn('[API] Env compression failed:', e)
-            processedEnvBuffer = envBuffer
+        // 处理环境图 (如果存在)
+        let envBase64: string | undefined
+        if (envFile) {
+            const envBuffer = Buffer.from(await envFile.arrayBuffer())
+            let processedEnvBuffer: Buffer
+            try {
+                processedEnvBuffer = await sharp(envBuffer)
+                    .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
+                    .jpeg({ quality: 75 })
+                    .toBuffer()
+                envBase64 = processedEnvBuffer.toString('base64')
+                console.log('[API] Env compressed:', (processedEnvBuffer.length / 1024).toFixed(0), 'KB')
+            } catch (e) {
+                console.warn('[API] Env compression failed:', e)
+                // fallback to raw buffer if compression fails
+                envBase64 = envBuffer.toString('base64')
+            }
+        } else {
+            console.log('[API] No environment file provided, will generate background')
         }
-        const envBase64 = processedEnvBuffer.toString('base64')
-        console.log('[API] Env compressed:', (processedEnvBuffer.length / 1024).toFixed(0), 'KB')
+
 
         console.log('[API] Images compressed, starting parallel generation...')
 

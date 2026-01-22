@@ -37,6 +37,7 @@ export default function HomePage() {
     // 模拟平滑进度增长
     let progressInterval: NodeJS.Timeout | null = null
     const smoothProgress = (start: number, end: number, duration: number) => {
+      if (progressInterval) clearInterval(progressInterval)
       const startTime = Date.now()
       progressInterval = setInterval(() => {
         const elapsed = Date.now() - startTime
@@ -44,7 +45,10 @@ export default function HomePage() {
 
         const current = start + (end - start) * percent
         setRealProgress(Math.floor(current))
-        if (percent >= 1 && progressInterval) clearInterval(progressInterval)
+        if (percent >= 1 && progressInterval) {
+          clearInterval(progressInterval)
+          progressInterval = null
+        }
       }, 100)
     }
 

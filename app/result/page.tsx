@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import Header from '@/components/Header' // Fix: Default import
-import { Download, Copy, Check, Share2 } from 'lucide-react' // Remove ArrowLeft
+import Header from '@/components/Header'
+import { Download, Copy, Check, Share2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 interface ResultData {
@@ -40,6 +40,11 @@ export default function ResultPage() {
                 parsed.copyTexts = { styleA: parsed.copyText, styleB: parsed.copyText, styleC: parsed.copyText }
             }
             setResult(parsed)
+
+            // 触觉反馈：轻微震动，增加"实体交付"感
+            if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                setTimeout(() => navigator.vibrate(50), 300)
+            }
         } else {
             router.push('/')
         }
@@ -127,20 +132,27 @@ export default function ResultPage() {
 
                 {/* 生成图片 - 拍立得/相纸风格 */}
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.1 }}
                     className="relative w-full aspect-square rounded-2xl bg-white p-3 shadow-2xl shadow-herb-primary/10 ring-1 ring-herb-primary/5"
                 >
-                    <div className="relative w-full h-full rounded-xl overflow-hidden">
-                        <Image
-                            src={`data:image/png;base64,${result.imageData}`}
-                            alt="生成结果"
-                            fill // Changed from layout="fill" to fill
-                            className="object-cover"
-                        />
+                    <div className="relative w-full h-full rounded-xl overflow-hidden bg-[#F0ECE6]">
+                        {/* 显影动画：模拟照片冲印过程 */}
+                        <motion.div
+                            initial={{ filter: 'blur(15px) grayscale(0.5) brightness(1.2)', opacity: 0 }}
+                            animate={{ filter: 'blur(0px) grayscale(0) brightness(1)', opacity: 1 }}
+                            transition={{ duration: 1.8, ease: "easeOut" }}
+                            className="w-full h-full relative"
+                        >
+                            <Image
+                                src={`data:image/png;base64,${result.imageData}`}
+                                alt="生成结果"
+                                fill
+                                className="object-cover"
+                            />
+                        </motion.div>
                     </div>
-                    {/* 装饰性水印或纹理可在此处添加 */}
                 </motion.div>
 
                 {/* 种草文案卡片 */}

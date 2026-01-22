@@ -263,11 +263,23 @@ export default function HomePage() {
               <h2 className="text-lg font-serif text-white/90 tracking-[0.15em] mb-2">
                 正在凝练东方美学
               </h2>
-              <p className="text-herb-gold/60 text-xs tracking-wider mb-6 font-light">
-                {progress === '正在压缩图片...' ? '准备素材中...' :
-                  progress === '正在上传至服务器...' ? '上传图片中...' :
-                    progress === 'AI正在创作中...' ? 'AI 融合仙草精粹...' : 'Processing...'}
-              </p>
+              {/* 动态故事文案 */}
+              <motion.p
+                key={
+                  realProgress < 20 ? "step1" :
+                    realProgress < 50 ? "step2" :
+                      realProgress < 80 ? "step3" : "step4"
+                }
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                className="text-herb-gold/80 text-xs tracking-widest mb-6 font-light min-h-[1.5em]"
+              >
+                {realProgress < 20 && "正在感知空间光影布局..."}
+                {realProgress >= 20 && realProgress < 50 && "甄选长白山人参等五行精粹..."}
+                {realProgress >= 50 && realProgress < 80 && "正在构筑现代隐士的生活意境..."}
+                {realProgress >= 80 && "注入内养生机，最后渲染中..."}
+              </motion.p>
 
               {/* 进度条 */}
               <div className="w-full bg-white/5 rounded-full h-1.5 mb-3 overflow-hidden">

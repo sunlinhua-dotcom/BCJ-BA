@@ -25,32 +25,61 @@ export async function generateProductImage(
     console.log('[Gemini] Starting product image generation for:', productName)
     console.log('[Gemini] API Key exists:', !!API_KEY)
 
-    // 精简提示词加速处理，加入五大仙草元素
-    const prompt = `Create a premium skincare product photo for 佰草集 HERBORIST ${productName}.
+    // 米其林美食摆盘风格提示词
+    const prompt = `You are a world-class commercial photographer creating a LUXURIOUS skincare product image.
 
-INPUT: 3 images - (1) Brand LOGO, (2) Product bottle, (3) Environment scene.
+BRAND: 佰草集 HERBORIST - ${productName}
 
-CRITICAL REQUIREMENTS:
-1. LOGO: Place in top-left or bottom-right corner as watermark (15-20% width)
-2. PRODUCT: Center hero, large and sharp with clear label
-3. ENVIRONMENT: Use IMAGE 3 as blurred atmospheric background
+INPUT IMAGES:
+- IMAGE 1: Brand LOGO (佰草集 HERBORIST)
+- IMAGE 2: Product bottle
+- IMAGE 3: Environment/Scene (use as REAL BACKGROUND)
 
-DECORATIVE ELEMENTS (MUST INCLUDE):
-Naturally arrange these 5 sacred herbs around the product:
-- 长白山人参 (Ginseng roots with fine tendrils and leaves)
-- 灵芝 (Whole Lingzhi/Reishi mushroom cap)
-- 牡丹籽 (Peony petals and seeds)
-- 紫苏籽 (Purple perilla leaves and seeds)
-- 北五味子 (Red Schisandra berry clusters)
+═══════════════════════════════════════════════════
+CREATE A MICHELIN-STAR FOOD PHOTOGRAPHY STYLE IMAGE
+═══════════════════════════════════════════════════
 
-These elements should:
-- Float elegantly around the product, not cover it
-- Be soft-focused/semi-transparent for depth
-- Create an oriental herbal aesthetic atmosphere
-- Match the environment lighting
+COMPOSITION REQUIREMENTS:
 
-STYLE: High-end commercial photography, oriental zen, luxury spa feeling.
-OUTPUT: 1:1 product poster with LOGO, product, herbs, and environment blended naturally.`
+1. 【BACKGROUND】
+   - Use IMAGE 3 as the REAL environment background
+   - Keep the environment authentic and slightly soft/blurred
+   - The scene should feel like a luxury spa, tea house, or fine dining setting
+
+2. 【PRODUCT PLACEMENT】
+   - Place the product bottle from IMAGE 2 in the CENTER of the image
+   - Product is the HERO - large, sharp, prominent
+   - Product should look REALISTICALLY placed in the environment
+   - Match lighting and shadows with the environment
+
+3. 【FIVE SACRED HERBS - ARTISTIC ARRANGEMENT】
+   Place these 5 elements AROUND the product like Michelin food plating:
+   
+   Each herb should be enclosed in an elegant TRANSPARENT SPHERE/BUBBLE:
+   - 长白山人参 (Ginseng root with tendrils) - bottom left area
+   - 灵芝 (Whole Lingzhi mushroom cap) - top right area
+   - 牡丹花瓣与籽 (Peony petals and seeds) - left side
+   - 紫苏叶 (Purple Perilla leaves) - right side  
+   - 北五味子 (Red Schisandra berry clusters) - bottom right area
+   
+   These transparent spheres should:
+   - Float elegantly around the product
+   - Have subtle light reflections for glass/bubble effect
+   - Be evenly spaced for visual balance
+   - Not overlap with the product
+
+4. 【LOGO】
+   - Place the LOGO from IMAGE 1 in the TOP LEFT corner
+   - Size: 15-20% of image width
+   - Clear and visible but not overpowering
+
+5. 【STYLE】
+   - Premium editorial photography
+   - Warm, luxurious lighting
+   - Oriental zen meets modern luxury
+   - Like a beauty magazine cover shot
+
+OUTPUT: 1:1 ratio premium product poster with product centered, 5 herbs in transparent bubbles arranged artistically around it, LOGO in top left, all SET IN the environment background.`
 
     const cleanLogoBase64 = logoBase64.replace(/^data:image\/\w+;base64,/, '')
     const cleanProductBase64 = productBase64.replace(/^data:image\/\w+;base64,/, '')

@@ -6,8 +6,8 @@ import path from 'path'
  * 使用 APIYI 代理调用 Gemini 模型
  */
 
-const API_KEY = process.env.GEMINI_API_KEY || 'sk-g8JehwXjfoWKeHxvDdAe2277FeA24c0094B7E6Fe5566346b'
-const TEXT_API_KEY = process.env.TEXT_API_KEY || 'sk-73hmLlh49czsaX0n4259C2BbF70c438dBb009f12Fe8aCa28'
+const API_KEY = process.env.GEMINI_API_KEY || 'sk-hUMNGKLJnZJERuBH9c6bBc14A4E145D993318583Db7f8fE9'
+const TEXT_API_KEY = process.env.TEXT_API_KEY || 'sk-ceYYSJQE98KNX7tl4f364a604eB741B28d4bCe1396A878Fb'
 const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-3-pro-image-preview'
 const TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-3-flash-preview'
 const BASE_URL = process.env.GEMINI_BASE_URL || 'https://api.apiyi.com/v1beta'

@@ -68,3 +68,525 @@ body {
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 }
+
+/* ─── 辅助 ──────────────────────────────────────────────────────────────── */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* ─── 页面容器 ──────────────────────────────────────────────────────────── */
+.page-container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 0 120px;
+  min-height: 100dvh;
+}
+
+.section {
+  padding: 24px 20px 0;
+}
+
+.section--step {
+  padding-top: 16px;
+  padding-bottom: 0;
+}
+
+.section--submit {
+  padding-top: 32px;
+}
+
+.section-title {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: var(--color-herb-dark);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.section-num {
+  color: var(--color-herb-primary);
+  font-weight: 700;
+}
+
+.section-optional {
+  font-size: 10px;
+  color: var(--color-herb-gold);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  margin-left: 4px;
+}
+
+/* ─── 步骤指示器 ─────────────────────────────────────────────────────────── */
+.step-indicator {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  padding: 8px 0;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  max-width: 100px;
+}
+
+.step-item__dot-wrap {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+.step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #aaa;
+  flex-shrink: 0;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.step-dot--current {
+  border-color: var(--color-herb-primary);
+  background: var(--color-herb-primary);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(74, 107, 80, 0.15);
+}
+
+.step-dot--done {
+  border-color: var(--color-herb-primary);
+  background: var(--color-herb-primary);
+  color: white;
+}
+
+.step-line {
+  position: absolute;
+  left: 50%;
+  right: -50%;
+  height: 2px;
+  background: #e8e8e8;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+.step-line--done {
+  background: var(--color-herb-primary);
+}
+
+.step-label {
+  font-size: 10px;
+  color: #aaa;
+  letter-spacing: 0.05em;
+  text-align: center;
+  transition: color 0.3s;
+  white-space: nowrap;
+}
+
+.step-label--current {
+  color: var(--color-herb-primary);
+  font-weight: 600;
+}
+
+/* ─── 角色卡 ─────────────────────────────────────────────────────────────── */
+.role-selector {
+  width: 100%;
+}
+
+.role-selector-label {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: var(--color-herb-dark);
+  margin-bottom: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.role-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.role-card {
+  position: relative;
+  background: white;
+  border: 2px solid #e8e4de;
+  border-radius: 16px;
+  padding: 20px 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.role-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(74,107,80,0.03) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.role-card--selected {
+  border-color: var(--color-herb-primary);
+  background: linear-gradient(135deg, rgba(74,107,80,0.06) 0%, white 60%);
+  box-shadow: 0 4px 20px rgba(74,107,80,0.15);
+}
+
+.role-card__badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  background: var(--color-herb-primary);
+  border-radius: 50%;
+  color: white;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.role-card__icon {
+  color: var(--color-herb-primary);
+  opacity: 0.8;
+}
+
+.role-card--selected .role-card__icon {
+  opacity: 1;
+}
+
+.role-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.role-card__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-herb-dark);
+  letter-spacing: 0.03em;
+}
+
+.role-card__en {
+  font-size: 9px;
+  color: #bbb;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.role-card__desc {
+  font-size: 11px;
+  color: var(--color-herb-gold);
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+
+/* ─── KOC 精准标签 ───────────────────────────────────────────────────────── */
+.koc-labels__inner {
+  background: linear-gradient(135deg, rgba(74,107,80,0.04) 0%, rgba(191,168,134,0.06) 100%);
+  border: 1px solid rgba(74,107,80,0.15);
+  border-radius: 14px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.koc-labels__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.koc-labels__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-herb-dark);
+  letter-spacing: 0.05em;
+}
+
+.koc-labels__hint {
+  font-size: 10px;
+  color: #aaa;
+  letter-spacing: 0.03em;
+}
+
+.chip-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chip-group__label {
+  font-size: 11px;
+  color: var(--color-herb-bronze);
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+
+.chip-group__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background: white;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.03em;
+}
+
+.chip:hover {
+  border-color: var(--color-herb-primary);
+  color: var(--color-herb-primary);
+}
+
+.chip--selected {
+  background: var(--color-herb-primary);
+  border-color: var(--color-herb-primary);
+  color: white;
+}
+
+/* ─── 产品卡 ─────────────────────────────────────────────────────────────── */
+.product-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.product-card {
+  position: relative;
+  background: white;
+  border: 2px solid #ede9e3;
+  border-radius: 14px;
+  padding: 14px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-card--selected {
+  border-color: var(--color-herb-primary);
+  box-shadow: 0 4px 16px rgba(74,107,80,0.15);
+}
+
+.product-card__check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  background: var(--color-herb-primary);
+  border-radius: 50%;
+  color: white;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-card__image-wrap {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-card__image {
+  max-height: 80px;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.product-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.product-card__name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-herb-dark);
+  letter-spacing: 0.05em;
+}
+
+.product-card__sub {
+  font-size: 10px;
+  color: var(--color-herb-gold);
+  letter-spacing: 0.08em;
+}
+
+/* ─── 环境上传区 ─────────────────────────────────────────────────────────── */
+.env-uploader {
+  width: 100%;
+}
+
+.env-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px dashed #ddd;
+  border-radius: 14px;
+  padding: 32px 20px;
+  cursor: pointer;
+  transition: all 0.25s;
+  background: white;
+  text-align: center;
+}
+
+.env-dropzone--dragging {
+  border-color: var(--color-herb-primary);
+  background: rgba(74,107,80,0.04);
+}
+
+.env-dropzone__icon {
+  font-size: 28px;
+  opacity: 0.5;
+}
+
+.env-dropzone__text {
+  font-size: 13px;
+  color: var(--color-herb-dark);
+  letter-spacing: 0.04em;
+}
+
+.env-dropzone__hint {
+  font-size: 11px;
+  color: #aaa;
+}
+
+.env-dropzone__skip {
+  font-size: 10px;
+  color: var(--color-herb-gold);
+  margin-top: 4px;
+}
+
+.env-preview {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  max-height: 200px;
+  width: 100%;
+}
+
+.env-preview__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.env-preview__remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border-radius: 50%;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* ─── 提交区 ─────────────────────────────────────────────────────────────── */
+.submit-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--color-herb-gold);
+  letter-spacing: 0.08em;
+}
+
+.submit-summary__sep {
+  opacity: 0.4;
+}
+
+.btn-generate {
+  width: 100%;
+  background: linear-gradient(135deg, var(--color-herb-primary) 0%, #3a5a40 100%);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 18px 24px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 8px 32px rgba(74,107,80,0.3);
+  transition: box-shadow 0.25s;
+}
+
+.btn-generate__text {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.btn-generate__sub {
+  font-size: 10px;
+  opacity: 0.75;
+  letter-spacing: 0.08em;
+}
+
+/* ─── 错误横幅 ───────────────────────────────────────────────────────────── */
+.error-banner {
+  margin: 16px 20px 0;
+  background: rgba(200,60,60,0.08);
+  border: 1px solid rgba(200,60,60,0.2);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #c83c3c;
+  text-align: center;
+  letter-spacing: 0.03em;
+}

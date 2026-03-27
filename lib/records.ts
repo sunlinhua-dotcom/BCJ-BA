@@ -2,10 +2,10 @@ import fs from 'fs';
 import path from 'path';
 
 export interface GenerationRecord {
-    timestamp: string; // ISO string
+    timestamp: string;
     productId: string;
+    role?: 'BA' | 'KOC';
     hasEnv: boolean;
-    // base64 strings may be large; store only length or a short hash
     imageSizeKB?: number;
     copyTexts?: { styleA: string; styleB: string; styleC: string };
 }

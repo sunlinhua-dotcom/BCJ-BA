@@ -13,106 +13,100 @@ export async function POST(req: Request) {
     try {
         const formData = await req.formData()
         const productId = formData.get('productId') as string
-        const envFile = formData.get('envFile') as File
+        const envFile = formData.get('envFile') as File | null
+        const role = (formData.get('role') as string || 'KOC') as 'BA' | 'KOC'
+        const skinType = formData.get('skinType') as string | null
+        const ageGroup = formData.get('ageGroup') as string | null
+        const scene = formData.get('scene') as string | null
 
-        console.log('[API] Request params:', { productId, hasEnvFile: !!envFile })
+        const labels = role === 'KOC' ? {
+            skinType: skinType || undefined,
+            ageGroup: ageGroup || undefined,
+            scene: scene || undefined,
+        } : undefined
+
+        console.log('[API] Request params:', { productId, hasEnvFile: !!envFile, role, labels })
 
         if (!productId) {
             return NextResponse.json({ error: "缺少产品选择" }, { status: 400 })
         }
 
-        // 获取产品信息
         const product = PRODUCTS.find(p => p.id === productId)
         if (!product) {
             return NextResponse.json({ error: "无效的产品选择" }, { status: 400 })
         }
 
-
-        // 2. 准备 Logo (作为 AI 参考图，非合成)
+        // 准备 Logo（作为 AI 参考图）
         const logoPath = path.join(process.cwd(), 'public', 'logo.png')
         let logoBase64 = ''
         try {
             const rawLogoBuffer = fs.readFileSync(logoPath)
-            // Logo: 保持 512px 但提高质量，确保文字清晰作为参考
             const processedLogo = await sharp(rawLogoBuffer)
                 .resize(512, null, { withoutEnlargement: true })
                 .png({ quality: 90, compressionLevel: 9 })
                 .toBuffer()
             logoBase64 = processedLogo.toString('base64')
-            console.log('[API] Logo prepared as reference')
         } catch (e) {
             console.warn('[API] Failed to load logo:', e)
         }
 
-        // 3. 准备产品图片 (AI 参考图)
+        // 准备产品图片
         const productImagePath = path.join(process.cwd(), 'public', 'products-ai', `${productId}.png`)
         const productBuffer = fs.readFileSync(productImagePath)
         let processedProductBuffer: Buffer
         try {
-            // 修正：产品图必须高清 (800px + Q95)，否则 AI 会丢失颜色细节导致"发白"
             processedProductBuffer = await sharp(productBuffer)
                 .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
                 .jpeg({ quality: 95, mozjpeg: true })
                 .toBuffer()
-        } catch (e) {
-            console.warn('[API] Product compression failed:', e)
+        } catch {
             processedProductBuffer = productBuffer
         }
         const productBase64 = processedProductBuffer.toString('base64')
 
-        // 3. 处理环境图 (如果存在)
+        // 处理环境图（可选）
         let envBase64: string | undefined
         if (envFile) {
             const envBuffer = Buffer.from(await envFile.arrayBuffer())
-            let processedEnvBuffer: Buffer
             try {
-                // 环境图：保持 512px 适度压缩 (Q75)，背景稍微模糊不影响
-                processedEnvBuffer = await sharp(envBuffer)
+                const processedEnvBuffer = await sharp(envBuffer)
                     .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
                     .jpeg({ quality: 75, mozjpeg: true })
                     .toBuffer()
                 envBase64 = processedEnvBuffer.toString('base64')
-                console.log('[API] Env compressed:', (processedEnvBuffer.length / 1024).toFixed(0), 'KB')
-            } catch (e) {
-                console.warn('[API] Env compression failed:', e)
+            } catch {
                 envBase64 = envBuffer.toString('base64')
             }
-        } else {
-            console.log('[API] No environment file provided, will generate background')
         }
 
         console.log('[API] Starting parallel generation...')
 
-        // 4. 并行生成：图片（含 Logo 修复指令） + 文案
+        // 并行生成：图片 + 文案（传入角色和标签）
         const [rawImageBase64, copyResult] = await Promise.all([
             generateProductImage(logoBase64, productBase64, envBase64, product.name),
-            generateUGCCopy(product.name)
+            generateUGCCopy(product.name, role, labels)
         ])
 
-        // 5. 不再合成 Logo，直接使用 AI 生成的纯净图
-        console.log('[API] Using clean AI image (No Logo)...')
-        const finalImageBase64 = rawImageBase64
-        // 6. 记录生成日志
+        // 记录日志
         try {
-            const record = {
+            addRecord({
                 timestamp: new Date().toISOString(),
                 productId: product.id,
+                role,
                 hasEnv: !!envFile,
-                imageSizeKB: Math.round(Buffer.from(finalImageBase64, 'base64').length / 1024),
+                imageSizeKB: Math.round(Buffer.from(rawImageBase64, 'base64').length / 1024),
                 copyTexts: copyResult
-            }
-            addRecord(record)
+            })
         } catch (e) {
             console.error('[API] Failed to log record:', e)
         }
 
-        console.log('[API] Generation & Composition complete!')
-
         return NextResponse.json({
             success: true,
-            imageData: finalImageBase64,
+            imageData: rawImageBase64,
             copyTexts: copyResult,
-            productName: product.name
+            productName: product.name,
+            role,
         })
 
     } catch (error: unknown) {

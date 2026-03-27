@@ -2,23 +2,44 @@ import fs from 'fs'
 import path from 'path'
 
 /**
- * 佰草集修源五行 - Gemini API 集成
- * 使用 APIYI 代理调用 Gemini 模型
+ * 佰草集修源五行 - Gemini API 集成（v2.0）
+ * 支持 BA / KOC 双角色文案生成
  */
 
 const API_KEY = process.env.GEMINI_API_KEY || 'sk-hUMNGKLJnZJERuBH9c6bBc14A4E145D993318583Db7f8fE9'
 const TEXT_API_KEY = process.env.TEXT_API_KEY || 'sk-ceYYSJQE98KNX7tl4f364a604eB741B28d4bCe1396A878Fb'
-const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-3-pro-image-preview'
-const TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-3-flash-preview'
+const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-3.1-flash-image-preview'
+const TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-3.1-pro-preview'
 const BASE_URL = process.env.GEMINI_BASE_URL || 'https://api.apiyi.com/v1beta'
 
+// ─── 随机辅助 ────────────────────────────────────────────────────────────────
+function getRandomItem<T>(arr: T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)]
+}
+
+// ─── 本地兜底文案库 ───────────────────────────────────────────────────────────
+function loadCopyLibrary(): Record<string, Record<string, string[]>> {
+    try {
+        const p = path.join(process.cwd(), 'app/data/copy_library.json')
+        return JSON.parse(fs.readFileSync(p, 'utf-8'))
+    } catch {
+        return {}
+    }
+}
+
+function getPreGeneratedCopy(
+    library: Record<string, Record<string, string[]>>,
+    productName: string,
+    style: 'styleA' | 'styleB' | 'styleC'
+): string {
+    const texts = library[productName.trim()]?.[style] || []
+    if (texts.length === 0) return `佰草集${productName}，修护时光，遇见更美的自己。`
+    return texts[Math.floor(Math.random() * texts.length)]
+}
+
+// ─── 图像生成 ─────────────────────────────────────────────────────────────────
 /**
  * 生成产品合成图片
- * @param logoBase64 - 品牌 LOGO Base64
- * @param productBase64 - 产品图 Base64
- * @param envBase64 - 环境图 Base64
- * @param productName - 产品名称（霜/水/油/乳）
- * @returns Base64 图片数据
  */
 export async function generateProductImage(
     logoBase64: string,
@@ -26,30 +47,20 @@ export async function generateProductImage(
     envBase64: string | undefined,
     productName: string
 ): Promise<string> {
-    // 产品真实尺寸信息
     const productSizes: Record<string, string> = {
         '仙草霜': '50ml cream jar, approximately 4.5-5cm tall, wide and short shape',
         '仙草露': '120ml toner bottle, approximately 13-15cm tall, slender cylindrical shape',
         '仙草油': '30ml oil bottle, approximately 8-10cm tall, small elegant bottle',
         '仙草乳': '100ml lotion bottle, approximately 13-15cm tall, medium pump bottle'
     }
-
-    // 产品外观材质 DNA (防止 AI 画成塑料)
-    // 产品外观材质 DNA (强制还原原色)
-    const productMaterials: Record<string, string> = {
-        'default': `
+    const materialInfo = `
         - **MATERIAL**: Original Bottle Material (Keep Exact Texture).
         - **COLOR**: **ORIGINAL BOTTLE COLOR** (Do not warm/cool it).
         - **FINISH**: Match the gloss/matte finish of IMAGE 1 exactly.`
-    }
-    const materialInfo = productMaterials['default']
 
     const sizeInfo = productSizes[productName] || '100ml bottle, approximately 13-15cm tall'
-
-    // 判断是否有环境图
     const hasEnvironment = envBase64 && envBase64.length > 100
 
-    // 根据是否有环境图选择不同的 prompt
     const prompt = hasEnvironment
         ? `You are a MASTER COMMERCIAL PHOTOGRAPHER creating a premium skincare product image.
 
@@ -71,31 +82,24 @@ The product bottle in IMAGE 2 MUST be reproduced with EXACT accuracy:
 - Cap/lid design must match EXACTLY
 - DO NOT alter, redesign, or "improve" the product appearance
 - Treat IMAGE 1 as a sacred reference for SHAPE and FORM.
-- **RESTORE LOGO**: The logo on the bottle in IMAGE 1 might be low-res. Use the distinct details from **IMAGE 3** to render the branding on the bottle sharply and accurately.
-- **PERSPECTIVE**: Apply the logo (from Image 3) onto the curved surface of the bottle naturally.
-- **NO FLOATING TEXT**: Do not add random text, watermarks, or logos to the background or corners.
+- **RESTORE LOGO**: Use the distinct details from **IMAGE 3** to render the branding sharply.
+- **PERSPECTIVE**: Apply the logo (from Image 3) onto the curved surface naturally.
+- **NO FLOATING TEXT**: Do not add random text, watermarks, or logos to the background.
 
-⚠️ MATERIAl & COLOR COMPLIANCE:
+⚠️ MATERIAL & COLOR COMPLIANCE:
 ${materialInfo}
-⚠️ MATERIAl & COLOR COMPLIANCE:
-${materialInfo}
-- STICTLY FORBIDDEN: Changing the bottle color.
+- STRICTLY FORBIDDEN: Changing the bottle color.
 - The bottle color must be SAMPLED directly from IMAGE 1.
-- If the bottle is white, keep it WHITE (not yellow, not blue).
-- If the bottle is matte, keep it MATTE.
 
 ═══════════════════════════════════════════════════
 YOUR TASK: CREATE A PROFESSIONAL PRODUCT PHOTOGRAPH
 ═══════════════════════════════════════════════════
 
 STEP 1: ANALYZE THE ENVIRONMENT (IMAGE 2)
-- What type of scene is this? (tea house, café, natural setting, spa, etc.)
 - Identify the BEST SURFACE to place the product
 - Find the most visually appealing angle and composition
-- Locate the LIGHT SOURCE
 
 STEP 2: INTELLIGENT COMPOSITION
-- Choose the optimal shooting position like a professional photographer
 - Product placed on the best surface identified
 - Background elements naturally BLURRED with depth of field
 
@@ -104,7 +108,6 @@ STEP 3: PRODUCT PLACEMENT
 - Product MUST have a contact point (not floating!)
 - **SCALE**: Match real dimensions (${sizeInfo})
 - Cast a NATURAL CONTACT SHADOW
-- Show realistic highlights, reflections, and texture
 
 STEP 4: FIVE SACRED HERBS
 Place naturally ON THE SURFACE around the product:
@@ -114,16 +117,12 @@ Place naturally ON THE SURFACE around the product:
 - 紫苏叶 (Perilla leaves) - near product
 - 北五味子 (Schisandra berries) - small cluster
 
-Each element: touches surface, casts shadow, looks fresh and real.
-
-STEP 5: LIGHTING & SHADOWS
+STEP 5: LIGHTING & DEPTH
 ALL elements share the SAME light source. Shadows point SAME direction.
-
-STEP 6: DEPTH OF FIELD
 Product and herbs: SHARP. Background: naturally BLURRED (f/2.8-f/4).
 
-STEP 7: CLEAN OUTPUT
-- Ensure no *extra* text is added to the background.
+STEP 6: CLEAN OUTPUT
+- Ensure no extra text is added to background.
 - Ensure the product label text is visible and sharp.
 OUTPUT: 1:1 ratio photorealistic product image.`
 
@@ -136,70 +135,35 @@ INPUT IMAGES:
 - IMAGE 1: Product bottle (${sizeInfo}) - Shape Reference
 - IMAGE 2: High-Res Brand Logo (Reference for bottle details)
 
-═══════════════════════════════════════════════════
 ⚠️ CRITICAL: PRODUCT ACCURACY
-═══════════════════════════════════════════════════
-The product bottle in IMAGE 1 MUST be reproduced with EXACT accuracy:
-- Bottle shape, proportions, and silhouette must match EXACTLY
-- Label design, text, and graphics must be IDENTICAL
-- Color scheme must be PRECISE
-- Cap/lid design must match EXACTLY
-- DO NOT alter, redesign, or "improve" the product appearance
-- **RESTORE LOGO**: The logo on the bottle in IMAGE 1 might be low-res. Use **IMAGE 2** (High-Res Logo) to render the branding on the bottle strictly and sharply.
-- **PERSPECTIVE**: Apply the logo (from Image 2) onto the curved surface of the bottle naturally.
-- **NO FLOATING TEXT**: Do not add random text, watermarks, or logos to the background or corners.
+The product bottle in IMAGE 1 MUST be reproduced with EXACT accuracy.
+- **RESTORE LOGO**: Use **IMAGE 2** to render branding sharply.
+- **NO FLOATING TEXT**: No random text in background.
 
-⚠️ MATERIAl & COLOR COMPLIANCE:
+⚠️ MATERIAL & COLOR COMPLIANCE:
 ${materialInfo}
-⚠️ MATERIAl & COLOR COMPLIANCE:
-${materialInfo}
-- STICTLY FORBIDDEN: Changing the bottle color.
-- The bottle color must be SAMPLED directly from IMAGE 1.
-- If the bottle is white, keep it WHITE (not yellow, not blue).
-- If the bottle is matte, keep it MATTE.
+- STRICTLY FORBIDDEN: Changing the bottle color.
 
-═══════════════════════════════════════════════════
 YOUR TASK: CREATE BACKGROUND + PRODUCT IMAGE
-═══════════════════════════════════════════════════
 
 STEP 1: CREATE A STUNNING INS-STYLE BACKGROUND
-Since no environment photo is provided, CREATE a beautiful background:
 - Style: Instagram-worthy, high-end lifestyle aesthetic
-- Options (choose the most suitable):
-  * Marble table with soft morning window light
-  * Wooden vanity table with golden hour sunlight
-  * Stone counter in a zen spa setting
-  * Elegant tea table with natural elements
 - Mood: Warm, inviting, luxurious, Oriental zen
 - Light: Soft, diffused, warm tone (golden hour preferred)
-- Include subtle environmental elements (shadows, bokeh, texture)
 
 STEP 2: PLACE THE EXACT PRODUCT
-- Place the EXACT product from IMAGE 1 on the surface
+- Place EXACT product from IMAGE 1 on the surface
 - Product MUST have contact with surface (not floating!)
 - **SCALE**: Match real dimensions (${sizeInfo})
 - Cast a NATURAL CONTACT SHADOW
-- Show realistic highlights and reflections matching the light
 
 STEP 3: FIVE SACRED HERBS
-Arrange naturally ON THE SURFACE around the product:
-- 长白山人参 (Ginseng root) - left side
-- 灵芝 (Lingzhi) - right side
-- 牡丹花瓣 (Peony petals) - scattered elegantly
-- 紫苏叶 (Perilla leaves) - near product
-- 北五味子 (Schisandra berries) - small cluster
+- 长白山人参 / 灵芝 / 牡丹花瓣 / 紫苏叶 / 北五味子
+Each: fresh, realistic, casting natural shadows.
 
-Each element: fresh, realistic, casting natural shadows.
-
-STEP 4: UNIFIED LIGHTING
-ALL elements share ONE light source from the background you created.
-
-STEP 5: DEPTH OF FIELD
+STEP 4: DEPTH OF FIELD
 Product and herbs: SHARP FOCUS. Background: naturally BLURRED.
 
-STEP 6: CLEAN OUTPUT
-- Ensure no *extra* text is added to the background.
-- Ensure the product label text is visible and sharp.
 OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.`
 
     const cleanLogoBase64 = logoBase64 ? logoBase64.replace(/^data:image\/\w+;base64,/, '') : ''
@@ -208,8 +172,6 @@ OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.
 
     const url = `${BASE_URL}/models/${IMAGE_MODEL}:generateContent`
     const startTime = Date.now()
-
-    // Retry logic for 503 errors
     const maxRetries = 3
     let lastError: Error | null = null
 
@@ -217,7 +179,6 @@ OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.
         try {
             const controller = new AbortController()
             const timeoutId = setTimeout(() => controller.abort(), 120000)
-
             console.log(`[Gemini] Image generation attempt ${attempt}/${maxRetries}...`)
 
             const response = await fetch(url, {
@@ -237,21 +198,16 @@ OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.
                     }],
                     generationConfig: {
                         responseModalities: ["IMAGE"],
-                        imageConfig: {
-                            aspectRatio: "1:1",
-                            imageSize: "1K"
-                        }
+                        imageConfig: { aspectRatio: "1:1", imageSize: "1K" }
                     }
                 }),
                 signal: controller.signal
             })
 
             clearTimeout(timeoutId)
-
             const elapsed = ((Date.now() - startTime) / 1000).toFixed(1)
             console.log(`[Gemini] Image response in ${elapsed}s, status: ${response.status}`)
 
-            // Handle 503 with retry
             if (response.status === 503 && attempt < maxRetries) {
                 console.warn(`[Gemini] Service unavailable (503), retrying in 2s...`)
                 await new Promise(resolve => setTimeout(resolve, 2000))
@@ -268,7 +224,6 @@ OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.
             const candidates = data.candidates
 
             if (!candidates || candidates.length === 0) {
-                console.error("[Gemini] No candidates, full response:", JSON.stringify(data, null, 2))
                 throw new Error("No candidates returned from Gemini")
             }
 
@@ -286,105 +241,23 @@ OUTPUT: 1:1 ratio photorealistic product image with dreamy INS-style background.
             lastError = error instanceof Error ? error : new Error(String(error))
             const elapsed = ((Date.now() - startTime) / 1000).toFixed(1)
             console.error(`[Gemini] Attempt ${attempt} failed after ${elapsed}s:`, lastError.message)
-
-            // Don't retry on non-retryable errors
-            if (!lastError.message.includes('503') && attempt < maxRetries) {
-                break
-            }
+            if (!lastError.message.includes('503') && attempt < maxRetries) break
         }
     }
 
     throw lastError || new Error("Failed to generate image after retries")
 }
 
-// 随机辅助函数
-function getRandomItem<T>(arr: T[]): T {
-    return arr[Math.floor(Math.random() * arr.length)]
-}
-
+// ─── 文案生成 ─────────────────────────────────────────────────────────────────
 /**
- * 生成UGC种草文案 - 三种风格 (千人千面版)
+ * 生成 UGC 文案 - 支持 BA / KOC 双角色，各三种风格
  */
-export async function generateUGCCopy(productName: string): Promise<{
-    styleA: string;
-    styleB: string;
-    styleC: string;
-}> {
-    console.log('[Gemini] Generating 3-style UGC copy for:', productName)
-
-    // 随机因子
-    const times = ['深夜加班后', '清晨醒来', '周末独处', '出差途中', '重要约会前']
-    const moods = ['疲惫求安慰', '充满期待', '从容淡定', '略带焦虑', '极度自律']
-    const randomContext = `场景设定：${getRandomItem(times)}，心情：${getRandomItem(moods)}。`
-
-    // Style A: 都市大女主 / 独立女性 / 职场精英 (多种微人设)
-    const styleAPersonas = [
-        `你是一位35+的外企高管，见过大世面，不仅买得起大牌，更懂得"鉴赏"。你反感制造焦虑，只信奉"长期主义"和"掌控感"。`,
-        `你是一位独立的知名时尚博主，不是那种随波逐流的网红，而是有思想的意见领袖。你认为护肤是"自我投资"的一部分。`,
-        `你是一位创业公司女CEO，每天都在打仗。你需要的不是"安慰剂"，而是能给你"底气"的战友。`
-    ]
-    const promptStyleA = `${getRandomItem(styleAPersonas)}
-${randomContext}
-请写一段关于佰草集修源五行【${productName}】的私房话。
-要求：
-- **拒绝焦虑词汇**：不要用"急救"、"烂脸"这种低级词，要用"重塑秩序"、"内在支撑"、"回血"。
-- **独特金句**：把护肤上升到人生哲学。例如："成年人的安全感，一半来自存款，一半来自皮肤的'稳'。"
-- **克制的高级感**：像在顶级私人Club里低声告诉闺蜜，不要像大卖场叫卖。
-- **280字左右**，直接输出文案。`
-
-    // Style B: 东方美学 / 隐士 / 生活艺术家 (多种微人设)
-    const styleBPersonas = [
-        `你是一位隐居在现代都市的茶道师，对气味和质地极其敏感。你认为护肤是一场"五感的修行"。`,
-        `你是一位古风摄影师，善于发现光影和意境之美。你眼中的护肤品，是大自然能量（草本）的具象化。`,
-        `你是一位追求极简生活的作家，讨厌繁复的堆砌，只喜欢"刚刚好"的滋养。`
-    ]
-    const promptStyleB = `${getRandomItem(styleBPersonas)}
-${randomContext}
-请写一篇关于佰草集修源五行【${productName}】的生活美学随笔。
-要求：
-- **通感描写**：着重描写草本的香气（苦后回甘）、质地的触感（温润如玉）。
-- **意境**：不要掉书袋，要写出"空灵"和"留白"。把五大仙草写成天地的馈赠。
-- **情绪价值**：护肤是为了"静心"，是在浮躁世界里找回"内在的平衡"。
-- **280字左右**，文字要有香气，直接输出文案。`
-
-    // Style C: 懂成分的闺蜜 / 智慧护肤导师 (去晦涩化)
-    // 痛点优化：不再是死板的研究员，而是能把复杂道理讲得简单的"聪明闺蜜"
-    const styleCPersonas = [
-        `你是一位拥有百万粉丝的"成分党"博主，最擅长把晦涩的论文讲成"人话"。`,
-        `你是一位资深配方师，但你痛恨把护肤品说成化学实验。你喜欢打比方，让小白也能听懂。`
-    ]
-    const promptStyleC = `${getRandomItem(styleCPersonas)}
-请写一篇关于佰草集修源五行【${productName}】的深度科普，但要**完全听得懂**。
-要求：
-- **讲人话**：不要堆砌"成纤维细胞"、"信号通路"这种词，除非你能立马解释。
-- **善用比喻**：把"修护屏障"比作"修城墙"，把"五大仙草"比作"给细胞喂的高级补品"。
-- **逻辑清晰**：先说**结果**（脸稳了、亮了），再说**原因**（因为人参给了能量，灵芝安抚了情绪）。
-- **客观**：既要专业，又要像邻家大姐姐一样真诚推荐。
-- **280字左右**，专业但有趣，直接输出文案。`
-
-    // ==========================================
-    // 预生成的高定文案库 (Pre-generated Copy Library)
-    // ==========================================
-
-    const copyLibraryPath = path.join(process.cwd(), 'app/data/copy_library.json')
-    let copyLibrary: Record<string, Record<string, string[]>> = {}
-
-    try {
-        const jsonContent = fs.readFileSync(copyLibraryPath, 'utf-8')
-        copyLibrary = JSON.parse(jsonContent)
-    } catch (e) {
-        console.error('[CopyLib] Failed to load library:', e)
-    }
-
-    function getPreGeneratedCopy(pName: string, style: 'styleA' | 'styleB' | 'styleC'): string {
-        const cleanName = pName.trim()
-        const styleTexts = copyLibrary[cleanName]?.[style] || []
-
-        if (styleTexts.length === 0) {
-            return `佰草集${cleanName}，修护时光，遇见更美的自己。`
-        }
-        return styleTexts[Math.floor(Math.random() * styleTexts.length)]
-    }
+export async function generateUGCCopy(
+    productName: string,
+    role: 'BA' | 'KOC' = 'KOC',
+    labels?: { skinType?: string; ageGroup?: string; scene?: string }
+): Promise<{ styleA: string; styleB: string; styleC: string }> {
+    console.log('[Gemini] Generating copy | role:', role, '| product:', productName, '| labels:', labels)
 
     const url = `${BASE_URL}/models/${TEXT_MODEL}:generateContent`
 
@@ -400,20 +273,107 @@ ${randomContext}
             })
             if (!response.ok) return fallback
             const data = await response.json()
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text
-            return text?.trim() || fallback
+            return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || fallback
         } catch (e) {
             console.error('[Gemini] Copy generation error:', e)
             return fallback
         }
     }
 
-    console.log('[Gemini] Generating 3-style AI copy...')
-    const [styleA, styleB, styleC] = await Promise.all([
-        generateOne(promptStyleA, getPreGeneratedCopy(productName, 'styleA')),
-        generateOne(promptStyleB, getPreGeneratedCopy(productName, 'styleB')),
-        generateOne(promptStyleC, getPreGeneratedCopy(productName, 'styleC'))
+    // ── BA 角色 ──────────────────────────────────────────────────────────────
+    if (role === 'BA') {
+        const randomTime = getRandomItem(['深夜护肤后', '早上客人到店前', '周末空档', '送走最后一位客人'])
+
+        const promptA = `你是一位佰草集专柜高级美容顾问，${randomTime}，在朋友圈分享你对【${productName}】的真实使用心得。
+
+要求：
+- **语气**：专业但有温度，像朋友圈说心里话，不是广告
+- **结构**：开头有钩子（疑问/数字/反差）→ 真实感受和具体变化 → 结尾留互动空间
+- **禁止**：不要用"限时特惠""立即购买"等广告词；不要@符号
+- **字数**：120-150字，刚好一个朋友圈
+- 直接输出文案正文，不要前缀`
+
+        const promptB = `你是佰草集专柜的美容顾问，正在给老客户发私信，跟进使用效果并推荐【${productName}】。
+
+要求：
+- **语气**：热情亲切，像老友聊天，有称谓感（姐/妹）
+- **内容**：问候使用情况 → 自然引出推荐 → 给出到店/试用理由
+- **避免**：不要太正式，不要像群发短信
+- **字数**：80-100字，简洁有回复欲
+- 直接输出文案正文，不要前缀`
+
+        const promptC = `你是有多年经验的佰草集美容顾问，在朋友圈发关于【${productName}】的专业测评。
+
+要求：
+- **语气**：专业权威，但用大众听得懂的方式讲成分和功效
+- **结构**：产品定位 → 核心成分+功效（用比喻，不堆砌术语）→ 适合人群 → 个人推荐语
+- **亮点**：体现专业知识，让粉丝觉得找到了护肤顾问
+- **字数**：150-180字
+- 直接输出文案正文，不要前缀`
+
+        console.log('[Gemini] Generating 3 BA-role copy styles in parallel...')
+        const [styleA, styleB, styleC] = await Promise.all([
+            generateOne(promptA, `作为佰草集美容顾问，我每天都在用${productName}，真的变化很大，有姐妹想了解的欢迎来找我～`),
+            generateOne(promptB, `姐，最近${productName}用得咋样？如果有任何问题都可以来店里找我哦～`),
+            generateOne(promptC, `今天来聊聊${productName}，核心成分是五大仙草精粹，特别适合想改善肤质的姐妹们。`),
+        ])
+        return { styleA, styleB, styleC }
+    }
+
+    // ── KOC 角色 ─────────────────────────────────────────────────────────────
+    const skin = labels?.skinType || '混合皮'
+    const age = labels?.ageGroup || '26-30岁'
+    const scene = labels?.scene || '日常护肤'
+
+    const xhsPersona = getRandomItem([
+        '你是拥有50万粉丝的小红书护肤博主，内容以真实测评著称，不接假广告',
+        '你是小红书头部KOC，擅长写出让人马上去买单的种草笔记',
+        '你是小红书护肤达人，用过上百款产品，分享风格犀利接地气',
+    ])
+    const friendPersona = getRandomItem([
+        '你是一个真实的护肤爱好者，不是博主，只是在和闺蜜分享自己发现的好东西',
+        '你是朋友圈里大家都信任的护肤达人，说话真实不夸张',
     ])
 
+    const promptA = `${xhsPersona}。
+
+请为佰草集【${productName}】写一篇小红书爆款笔记，目标读者是${skin}的${age}女生，使用场景：${scene}。
+
+要求：
+- **标题**（第一行）：爆款格式，如"干皮救星！/用了3个月告诉你/不踩雷！"
+- **正文**：痛点开场 → 产品初印象 → 使用体验（有细节、有感受）→ 效果对比 → 种草总结
+- **关键词**：自然植入（仙草/五行/修护/紧致等）
+- **结尾**：引导评论互动
+- **字数**：200-250字
+- 直接输出笔记正文（含标题），不要前缀`
+
+    const promptB = `${friendPersona}。
+
+请以闺蜜聊天的方式，写一段关于佰草集【${productName}】的真实分享，给${skin}的${age}闺蜜看的。
+
+要求：
+- **语气**：完全口语化，像微信语音转文字，有语气词（哦/啊/吧/真的/绝了）
+- **内容**：为什么开始用 → 第一次用的感受 → 坚持使用后的变化 → 推荐理由
+- **真实感**：可以有小缺点，反而更可信
+- **字数**：150-200字
+- 直接输出正文，不要前缀`
+
+    const promptC = `你是专业护肤内容创作者，擅长根据用户画像定制种草内容。
+
+请为佰草集【${productName}】创作精准种草文案：
+- 目标用户：${skin}、${age}、使用场景是${scene}
+- 内容要紧扣这个人群的皮肤痛点和生活场景，不要写通稿
+- **结构**：精准痛点（让目标用户觉得"说的就是我"）→ 产品如何针对性解决 → 具体使用方法/时机 → 效果承诺
+- **语气**：专业且亲切，介于测评博主和闺蜜之间
+- **字数**：200-250字
+- 直接输出正文，不要前缀`
+
+    const lib = loadCopyLibrary()
+    console.log('[Gemini] Generating 3 KOC-role copy styles in parallel...')
+    const [styleA, styleB, styleC] = await Promise.all([
+        generateOne(promptA, getPreGeneratedCopy(lib, productName, 'styleA')),
+        generateOne(promptB, getPreGeneratedCopy(lib, productName, 'styleB')),
+        generateOne(promptC, getPreGeneratedCopy(lib, productName, 'styleC')),
+    ])
     return { styleA, styleB, styleC }
 }

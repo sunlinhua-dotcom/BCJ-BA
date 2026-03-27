@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Header from '@/components/Header'
 import { Download, Copy, Check, Share2 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { COPY_STYLE_LABELS, UserRole } from '@/lib/constants'
 
 interface ResultData {
     imageData: string
@@ -15,24 +16,23 @@ interface ResultData {
         styleC: string
     }
     productName: string
+    role?: UserRole
 }
 
 type CopyStyle = 'styleA' | 'styleB' | 'styleC'
 
-const STYLE_LABELS: Record<CopyStyle, string> = {
-    styleA: '闺蜜分享',
-    styleB: '东方美学',
-    styleC: '成分科普'
-}
-
 export default function ResultPage() {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const [result, setResult] = useState<ResultData | null>(null)
     const [copied, setCopied] = useState(false)
     const [activeStyle, setActiveStyle] = useState<CopyStyle>('styleA')
 
     useEffect(() => {
-        const stored = sessionStorage.getItem('herborist_result')
+        const key = searchParams.get('key')
+        const stored = key
+            ? sessionStorage.getItem(key)
+            : sessionStorage.getItem('herborist_result')
         if (stored) {
             const parsed = JSON.parse(stored)
             // 兼容旧格式
@@ -40,17 +40,16 @@ export default function ResultPage() {
                 parsed.copyTexts = { styleA: parsed.copyText, styleB: parsed.copyText, styleC: parsed.copyText }
             }
             setResult(parsed)
-
-            // 触觉反馈：轻微震动，增加"实体交付"感
             if (typeof navigator !== 'undefined' && navigator.vibrate) {
                 setTimeout(() => navigator.vibrate(50), 300)
             }
         } else {
             router.push('/')
         }
-    }, [router])
+    }, [router, searchParams])
 
     const currentCopy = result?.copyTexts?.[activeStyle] || ''
+    const styleLabels = COPY_STYLE_LABELS[result?.role || 'KOC']
 
     const handleCopy = async () => {
         if (!currentCopy) return
@@ -175,14 +174,14 @@ export default function ResultPage() {
                                         : 'bg-white/60 text-herb-dark/70 hover:bg-white border border-herb-gold/20'}
                                 `}
                             >
-                                {STYLE_LABELS[style]}
+                                {styleLabels[style]}
                             </button>
                         ))}
                     </div>
 
                     <div className="flex items-center justify-between px-1">
                         <span className="text-[10px] text-herb-accent tracking-[0.2em] uppercase font-light">
-                            {STYLE_LABELS[activeStyle]}
+                            {styleLabels[activeStyle]}
                         </span>
                         <button
                             onClick={handleCopy}

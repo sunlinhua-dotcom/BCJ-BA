@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import { PRODUCTS, UserRole } from '@/lib/constants'
 import Header from '@/components/Header'
 import FortuneLoading from '@/components/FortuneLoading'
@@ -40,7 +41,7 @@ function ProductCard({
                 </motion.div>
             )}
             <div className="product-card__image-wrap">
-                <img src={product.image} alt={product.name} className="product-card__image" />
+                <Image src={product.image} alt={product.name} width={80} height={80} className="product-card__image" />
             </div>
             <div className="product-card__body">
                 <p className="product-card__name">{product.name}</p>
@@ -52,7 +53,6 @@ function ProductCard({
 
 // ─── 上传区 ──────────────────────────────────────────────────────────────────
 function EnvironmentUploader({
-    file,
     onChange,
 }: {
     file: File | null
@@ -88,6 +88,7 @@ function EnvironmentUploader({
             />
             {preview ? (
                 <motion.div className="env-preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={preview} alt="场景预览" className="env-preview__img" />
                     <button
                         className="env-preview__remove"
@@ -147,11 +148,14 @@ export default function HomePage() {
             formData.append('role', role!)
             if (envFile) formData.append('envFile', envFile)
 
-            // KOC 精准标签
+            // KOC 精准标签 - 传中文 label 给 AI（而非英文 id）
             if (role === 'KOC') {
-                formData.append('skinType', skinType)
-                formData.append('ageGroup', ageGroup)
-                formData.append('scene', scene)
+                const skinLabels: Record<string, string> = { dry: '干皮', oily: '油皮', combo: '混合皮', sensitive: '敏感肌' }
+                const ageLabels: Record<string, string> = { '20-25': '20-25岁', '26-30': '26-30岁', '31-35': '31-35岁', '35+': '35岁以上' }
+                const sceneLabels: Record<string, string> = { daily: '日常护肤', seasonal: '换季修护', travel: '出行旅行', bedtime: '睡前护理' }
+                formData.append('skinType', skinLabels[skinType] || skinType)
+                formData.append('ageGroup', ageLabels[ageGroup] || ageGroup)
+                formData.append('scene', sceneLabels[scene] || scene)
             }
 
             const res = await fetch('/api/generate', { method: 'POST', body: formData })

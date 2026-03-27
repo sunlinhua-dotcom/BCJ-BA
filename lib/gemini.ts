@@ -268,12 +268,15 @@ export async function generateUGCCopy(
                 headers: { 'Authorization': `Bearer ${TEXT_API_KEY}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 0.9, maxOutputTokens: 1024 }
+                    generationConfig: { temperature: 0.9, maxOutputTokens: 2048 }
                 })
             })
             if (!response.ok) return fallback
             const data = await response.json()
-            return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || fallback
+            const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+            // 过滤 APIYI 注入的水印字符，格式如 (82)(83) 等括号数字
+            const clean = raw.replace(/\(\d+\)/g, '').trim()
+            return clean || fallback
         } catch (e) {
             console.error('[Gemini] Copy generation error:', e)
             return fallback
@@ -288,28 +291,29 @@ export async function generateUGCCopy(
 
 要求：
 - **语气**：专业但有温度，像朋友圈说心里话，不是广告
-- **结构**：开头有钩子（疑问/数字/反差）→ 真实感受和具体变化 → 结尾留互动空间
-- **禁止**：不要用"限时特惠""立即购买"等广告词；不要@符号
-- **字数**：120-150字，刚好一个朋友圈
-- 直接输出文案正文，不要前缀`
+- **结构**：开头有钩子（疑问句/数字/反差）→ 具体使用感受和皮肤变化细节 → 结尾留出互动空间
+- **细节**：要有具体的使用细节（比如质地、气味、用完的感受），不要泛泛而谈
+- **禁止**：不要用"限时特惠""立即购买"等广告词；禁止@符号
+- **字数**：150-200字，内容丰富，有料有温度
+- 直接输出文案正文，不要任何前缀和标题`
 
-        const promptB = `你是佰草集专柜的美容顾问，正在给老客户发私信，跟进使用效果并推荐【${productName}】。
-
-要求：
-- **语气**：热情亲切，像老友聊天，有称谓感（姐/妹）
-- **内容**：问候使用情况 → 自然引出推荐 → 给出到店/试用理由
-- **避免**：不要太正式，不要像群发短信
-- **字数**：80-100字，简洁有回复欲
-- 直接输出文案正文，不要前缀`
-
-        const promptC = `你是有多年经验的佰草集美容顾问，在朋友圈发关于【${productName}】的专业测评。
+        const promptB = `你是佰草集专柜的美容顾问，正在给一位2-3个月没来的老客户发微信私信，真诚询问近况并推荐【${productName}】。
 
 要求：
-- **语气**：专业权威，但用大众听得懂的方式讲成分和功效
-- **结构**：产品定位 → 核心成分+功效（用比喻，不堆砌术语）→ 适合人群 → 个人推荐语
-- **亮点**：体现专业知识，让粉丝觉得找到了护肤顾问
-- **字数**：150-180字
-- 直接输出文案正文，不要前缀`
+- **语气**：像真实朋友发微信，热情亲切有温度，有称谓感（姐/妹），绝对不像群发短信
+- **内容**：先关心别来经历 → 分享自己最近发现产品有什么特别 → 자然引到这款产品的亮点 → 发出邀约（周末/下次来店）
+- **真实感**：要像真人在打字，可以有语气词，加一点生活感的细节
+- **字数**：100-130字，刚好是一条有温度的私信
+- 直接输出正文，不要任何前缀`
+
+        const promptC = `你是有多年经验的佰草集美容顾问，在朋友圈发关于【${productName}】的深度专业测评。
+
+要求：
+- **语气**：专业权威，但用大众听得懂的方式讲成分和功效，不堆砌晦涩术语
+- **结构**：产品定位和特点 → 核心成分+功效（用比喻让人听懂）→ 亲测明显改善的方面 → 适合人群 → 真诚推荐语
+- **亮点**：体现多年专业知识，让粉丝觉得找到了专属护肤顾问
+- **字数**：180-220字，有深度有干货
+- 直接输出文案正文，不要任何前缀`
 
         console.log('[Gemini] Generating 3 BA-role copy styles in parallel...')
         const [styleA, styleB, styleC] = await Promise.all([

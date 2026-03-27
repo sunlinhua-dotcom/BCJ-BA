@@ -1,7 +1,6 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
+import { Suspense } from 'react'
 
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -24,7 +23,7 @@ interface ResultData {
 
 type CopyStyle = 'styleA' | 'styleB' | 'styleC'
 
-export default function ResultPage() {
+export function ResultContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [result, setResult] = useState<ResultData | null>(null)
@@ -258,5 +257,17 @@ export default function ResultPage() {
                 </motion.div>
             </div>
         </div>
+    )
+}
+
+export default function ResultPage() {
+    return (
+        <Suspense fallback={
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
+                <p style={{ color: '#4A6B50', fontSize: 14, letterSpacing: '0.1em' }}>加载中…</p>
+            </div>
+        }>
+            <ResultContent />
+        </Suspense>
     )
 }

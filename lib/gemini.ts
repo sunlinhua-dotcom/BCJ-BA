@@ -268,14 +268,27 @@ export async function generateUGCCopy(
                 headers: { 'Authorization': `Bearer ${TEXT_API_KEY}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 0.9, maxOutputTokens: 2048 }
+                    generationConfig: { temperature: 0.9, maxOutputTokens: 4096 }
                 })
             })
             if (!response.ok) return fallback
             const data = await response.json()
             const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
             // 过滤 APIYI 注入的水印字符，格式如 (82)(83) 等括号数字
-            const clean = raw.replace(/\(\d+\)/g, '').trim()
+            let clean = raw.replace(/\(\d+\)/g, '').trim()
+            // 截断检测：若末尾不是完整标点，说明被截断，从最后一个完整句子截取
+            if (clean && !/[。！？~～…」』\n]$/.test(clean)) {
+                const lastStop = Math.max(
+                    clean.lastIndexOf('。'),
+                    clean.lastIndexOf('！'),
+                    clean.lastIndexOf('？'),
+                    clean.lastIndexOf('～'),
+                    clean.lastIndexOf('\n'),
+                )
+                if (lastStop > clean.length * 0.5) {
+                    clean = clean.substring(0, lastStop + 1)
+                }
+            }
             return clean || fallback
         } catch (e) {
             console.error('[Gemini] Copy generation error:', e)

@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from 'react'
 // Lucide icons replaced with inline SVGs for stability
-import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface EnvironmentUploaderProps {
@@ -113,11 +112,11 @@ export function EnvironmentUploader({ file, onFileChange }: EnvironmentUploaderP
                         animate={{ opacity: 1, scale: 1 }}
                         className="relative h-48 rounded-[20px] overflow-hidden shadow-xl shadow-[#8B7355]/10 ring-1 ring-white group"
                     >
-                        <Image
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
                             src={URL.createObjectURL(file)}
                             alt="环境预览"
-                            fill
-                            className="object-cover transition-transform duration-700 group-hover:scale-105 saturate-[0.95] group-hover:saturate-100"
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 saturate-[0.95] group-hover:saturate-100"
                         />
 
                         {/* Elegant Vignette */}

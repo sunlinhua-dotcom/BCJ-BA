@@ -112,8 +112,8 @@ STEP 3: PRODUCT PLACEMENT
 STEP 4: FIVE SACRED HERBS
 Place naturally ON THE SURFACE around the product:
 - 长白山人参 (Ginseng root) - left side
-- 灵芝 (Lingzhi) - right side
-- 牡丹花瓣 (Peony petals) - scattered
+- 灵芝 (Lingzhi mushroom) - right side
+- 整朵牡丹花 (Whole Peony flower, NOT petals) - full bloom, elegant placement
 - 紫苏叶 (Perilla leaves) - near product
 - 北五味子 (Schisandra berries) - small cluster
 
@@ -121,9 +121,11 @@ STEP 5: LIGHTING & DEPTH
 ALL elements share the SAME light source. Shadows point SAME direction.
 Product and herbs: SHARP. Background: naturally BLURRED (f/2.8-f/4).
 
-STEP 6: CLEAN OUTPUT
-- Ensure no extra text is added to background.
-- Ensure the product label text is visible and sharp.
+STEP 6: CLEAN OUTPUT — STRICTLY NO TEXT
+⛔ ABSOLUTELY FORBIDDEN: Do NOT add ANY text, labels, annotations, captions, Chinese characters, or watermarks anywhere in the image.
+⛔ Do NOT label the herbs with their names.
+⛔ Do NOT add any overlay text on the background.
+- Ensure the product label text is visible and sharp (only the original bottle label).
 OUTPUT: 1:1 ratio photorealistic product image.`
 
         : `You are a MASTER COMMERCIAL PHOTOGRAPHER creating a premium skincare product image with a DREAMY BACKGROUND.
@@ -158,8 +160,14 @@ STEP 2: PLACE THE EXACT PRODUCT
 - Cast a NATURAL CONTACT SHADOW
 
 STEP 3: FIVE SACRED HERBS
-- 长白山人参 / 灵芝 / 牡丹花瓣 / 紫苏叶 / 北五味子
+- 长白山人参 (Ginseng root)
+- 灵芝 (Lingzhi mushroom)
+- 整朵牡丹花 (Whole Peony flower, NOT petals, full bloom)
+- 紫苏叶 (Perilla leaves)
+- 北五味子 (Schisandra berries)
 Each: fresh, realistic, casting natural shadows.
+
+⛔ STRICTLY NO TEXT: Do NOT add any labels, annotations, Chinese characters, or text anywhere in the image.
 
 STEP 4: DEPTH OF FIELD
 Product and herbs: SHARP FOCUS. Background: naturally BLURRED.

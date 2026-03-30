@@ -77,13 +77,13 @@ export default function FortuneLoading({ externalProgress }: { externalProgress?
             <div className="relative z-10 flex flex-col items-center max-w-xs text-center">
 
                 {/* 顶部：Logo 悬浮 (呼吸感) */}
-                <div className="mb-12 relative opacity-80 animate-float-slow">
-                    <div className="relative w-16 h-8">
+                <div className="mb-10 relative opacity-85 animate-float-slow">
+                    <div className="relative w-36 h-14">
                         <Image
                             src="/logo-opt.png"
                             alt="Logo"
                             fill
-                            className="object-contain brightness-0 invert opacity-60"
+                            className="object-contain brightness-0 invert opacity-70"
                         />
                     </div>
                 </div>

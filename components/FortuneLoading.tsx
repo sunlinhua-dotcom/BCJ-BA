@@ -74,38 +74,38 @@ export default function FortuneLoading({ externalProgress }: { externalProgress?
             </div>
 
             {/* 3. 核心仪式区 */}
-            <div className="relative z-10 flex flex-col items-center max-w-xs text-center">
+            <div className="relative z-10 flex flex-col items-center w-full max-w-sm text-center px-6">
 
-                {/* 顶部：Logo 悬浮 (呼吸感) */}
-                <div className="mb-10 relative opacity-85 animate-float-slow">
-                    <div className="relative w-36 h-14">
-                        <Image
-                            src="/logo-opt.png"
-                            alt="Logo"
-                            fill
-                            className="object-contain brightness-0 invert opacity-70"
-                        />
-                    </div>
+                {/* 顶部：Logo (放大至与签文等大) */}
+                <div className="mb-8 animate-pulse-slow">
+                    <Image
+                        src="/logo-opt.png"
+                        alt="佰草集"
+                        width={260}
+                        height={146}
+                        priority
+                        className="brightness-0 invert opacity-80"
+                    />
                 </div>
 
                 {/* 中间：签文显影 (Blur + FadeIn) */}
                 <div className={`transition-all duration-[2000ms] ease-out transform ${showText ? 'opacity-100 blur-0 translate-y-0' : 'opacity-0 blur-lg translate-y-4'}`}>
 
                     {/* 装饰线 */}
-                    <div className="w-[1px] h-16 mx-auto bg-gradient-to-b from-transparent via-[#8B7355]/40 to-transparent mb-8" />
+                    <div className="w-[1px] h-10 mx-auto bg-gradient-to-b from-transparent via-[#8B7355]/40 to-transparent mb-6" />
 
                     <h2 className="text-2xl md:text-3xl font-serif tracking-[0.2em] leading-relaxed text-[#E5Dec5] drop-shadow-[0_0_15px_rgba(229,222,197,0.3)]">
                         {fortune.text}
                     </h2>
 
-                    <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-[#8B7355]/30 to-transparent my-8" />
+                    <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-[#8B7355]/30 to-transparent my-6" />
 
                     <p className="text-sm font-light text-[#8B7355] tracking-widest italic opacity-90 transition-all duration-700">
                         {BRAND_MESSAGES[msgIndex]}
                     </p>
 
                     {/* 装饰线 */}
-                    <div className="w-[1px] h-16 mx-auto bg-gradient-to-t from-transparent via-[#8B7355]/40 to-transparent mt-8" />
+                    <div className="w-[1px] h-10 mx-auto bg-gradient-to-t from-transparent via-[#8B7355]/40 to-transparent mt-6" />
                 </div>
             </div>
 

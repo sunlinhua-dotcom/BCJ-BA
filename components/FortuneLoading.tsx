@@ -94,12 +94,6 @@ export default function FortuneLoading({ externalProgress }: { externalProgress?
                     {/* 装饰线 */}
                     <div className="w-[1px] h-10 mx-auto bg-gradient-to-b from-transparent via-[#8B7355]/40 to-transparent mb-6" />
 
-                    <h2 className="text-2xl md:text-3xl font-serif tracking-[0.2em] leading-relaxed text-[#E5Dec5] drop-shadow-[0_0_15px_rgba(229,222,197,0.3)]">
-                        {fortune.text}
-                    </h2>
-
-                    <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-[#8B7355]/30 to-transparent my-6" />
-
                     <p className="text-sm font-light text-[#8B7355] tracking-widest italic opacity-90 transition-all duration-700">
                         {BRAND_MESSAGES[msgIndex]}
                     </p>

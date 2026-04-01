@@ -457,10 +457,10 @@ herborist-app/
 
 ---
 
-### 🔄 TASK-033 · 生成速度优化 + 白色牡丹花
+### ✅ TASK-033 · 生成速度优化 + 白色牡丹花
 
 - **时间：** 2026-04-01
-- **状态：** 代码已改完，待推送部署
+- **状态：** ✅已完成
 - **需求来源：** 用户反馈生成图片很慢；同时要求牡丹花改为白色
 
 #### 全链路瓶颈分析
@@ -491,27 +491,43 @@ herborist-app/
 
 ---
 
+### ✅ TASK-034 · 深度拦截AI生成文字与界面精简
+
+- **时间：** 2026-04-01
+- **Commit：** `a3e259f fix: remove chinese herb names from prompt to prevent text rendering, remove large fortune text from loading screen`
+- **需求来源：** 用户反馈AI还在图片里强行标注中文名；不需要Loading页的巨大古风占卜文案
+- **修复内容：**
+
+1. **图片禁止文字（深度限制）**
+   - **问题：** 原先只是在 Prompt 后续加了“FORBIDDEN TEXT”，但由于元素清单列了中文解释 `长白山人参 (Ginseng root)`，导致 AI 认为必须要把“长白山人参”这几个中文字画进去。
+   - **修复：** 将五大仙草的描述里的中文词全删，仅保留全英文（如直接写 `Ginseng root` / `Lingzhi mushroom`），从根源杜绝AI获取中文词汇并写入画面，彻底阻止文字生成。
+2. **Loading界面精简**
+   - **问题：** Loading时中间显示巨大的签文（如：草木有本心，何求美人折）。
+   - **修复：** 在 `components/FortuneLoading.tsx` 中删除了巨大的 `<h2 className="text-2xl...">{fortune.text}</h2>` 及其中间分割线，使界面清爽，只保留 Logo 下方轮播的现代品牌态度短语。
+
+---
+
 ## 📋 待开发任务（BACKLOG）
 
-### 📋 TASK-034 · 兜底文案库填充
+### 📋 TASK-035 · 兜底文案库填充
 
 - **状态：** 待开发
 - **描述：** `app/data/copy_library.json` 当前所有文案数组为空，AI 失败时会显示极简兜底句
 - **计划：** 运行 `scripts/generate_copy_library.js` 批量生成，或人工填入各产品×各角色×各风格文案
 
-### 📋 TASK-035 · 历史记录页 UI 升级
+### 📋 TASK-036 · 历史记录页 UI 升级
 
 - **状态：** 待开发
 - **描述：** `/records` 页面目前是朴素 HTML table，与整体黑金东方风格不符
 - **计划：** 按整体设计系统重写，支持按角色/产品筛选，显示文案预览卡片
 
-### 📋 TASK-036 · 用户分享体验优化
+### 📋 TASK-037 · 用户分享体验优化
 
 - **状态：** 待开发
 - **描述：** 结果页「分享」功能依赖 Web Share API，部分 Android 浏览器不支持
 - **计划：** 加降级方案（复制链接 / 长按图片保存提示）
 
-### 📋 TASK-037 · 生产环境监控
+### 📋 TASK-038 · 生产环境监控
 
 - **状态：** 待开发
 - **描述：** 目前 Zeabur 仅靠 console.log，无报警机制
@@ -528,11 +544,11 @@ herborist-app/
 | 3 | KOC 标签传中文 | ✅已修复 | 前端做 id→label 映射 |
 | 4 | Loading Logo 消失 | ✅已修复 | 改为固定尺寸渲染，不用 fill 模式 |
 | 5 | 场景预览 Load failed | ✅已修复 | blob URL 改用原生 img |
-| 6 | AI 图中文字标注 | ✅已修复 | Prompt 加 FORBIDDEN 规则 |
+| 6 | AI 图中文字标注 | ✅已修复 | 把Prompt中仙草的中文去掉了，避免中文出现 |
 | 7 | `/records` 页不显示 role | 🟡待优化 | RecordItem 接口缺 role 字段 |
 | 8 | copy_library.json 为空 | 📋待填充 | AI 失败时兜底文案太简陋 |
 | 9 | 产品图 jpg 源文件巨大 | 🟡可清理 | 4个 .jpg 各约30MB，仅用于本地，git忽略即可 |
 
 ---
 
-*日志由 Antigravity AI 辅助维护 · 最后更新 2026-04-01 17:46*
+*日志由 Antigravity AI 辅助维护 · 最后更新 2026-04-01 18:28*

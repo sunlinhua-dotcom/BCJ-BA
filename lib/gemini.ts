@@ -111,11 +111,11 @@ STEP 3: PRODUCT PLACEMENT
 
 STEP 4: FIVE SACRED HERBS
 Place naturally ON THE SURFACE around the product:
-- 长白山人参 (Ginseng root) - left side
-- 灵芝 (Lingzhi mushroom) - right side
-- 整朵白色牡丹花 (Whole WHITE Peony flower, NOT petals, NOT pink) - full bloom, elegant placement
-- 紫苏叶 (Perilla leaves) - near product
-- 北五味子 (Schisandra berries) - small cluster
+- Ginseng root - left side
+- Lingzhi mushroom - right side
+- Whole WHITE Peony flower (NOT petals, NOT pink) - full bloom, elegant placement
+- Perilla leaves - near product
+- Schisandra berries - small cluster
 
 STEP 5: LIGHTING & DEPTH
 ALL elements share the SAME light source. Shadows point SAME direction.
@@ -160,11 +160,11 @@ STEP 2: PLACE THE EXACT PRODUCT
 - Cast a NATURAL CONTACT SHADOW
 
 STEP 3: FIVE SACRED HERBS
-- 长白山人参 (Ginseng root)
-- 灵芝 (Lingzhi mushroom)
-- 整朵白色牡丹花 (Whole WHITE Peony flower, NOT petals, NOT pink, full bloom)
-- 紫苏叶 (Perilla leaves)
-- 北五味子 (Schisandra berries)
+- Ginseng root
+- Lingzhi mushroom
+- Whole WHITE Peony flower (NOT petals, NOT pink, full bloom)
+- Perilla leaves
+- Schisandra berries
 Each: fresh, realistic, casting natural shadows.
 
 ⛔ STRICTLY NO TEXT: Do NOT add any labels, annotations, Chinese characters, or text anywhere in the image.

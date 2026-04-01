@@ -42,8 +42,8 @@ export async function POST(req: Request) {
         try {
             const rawLogoBuffer = fs.readFileSync(logoPath)
             const processedLogo = await sharp(rawLogoBuffer)
-                .resize(512, null, { withoutEnlargement: true })
-                .png({ quality: 90, compressionLevel: 9 })
+                .resize(256, null, { withoutEnlargement: true })
+                .png({ quality: 80, compressionLevel: 9 })
                 .toBuffer()
             logoBase64 = processedLogo.toString('base64')
         } catch (e) {
@@ -56,8 +56,8 @@ export async function POST(req: Request) {
         let processedProductBuffer: Buffer
         try {
             processedProductBuffer = await sharp(productBuffer)
-                .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
-                .jpeg({ quality: 95, mozjpeg: true })
+                .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
+                .jpeg({ quality: 80, mozjpeg: true })
                 .toBuffer()
         } catch {
             processedProductBuffer = productBuffer
@@ -70,8 +70,8 @@ export async function POST(req: Request) {
             const envBuffer = Buffer.from(await envFile.arrayBuffer())
             try {
                 const processedEnvBuffer = await sharp(envBuffer)
-                    .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
-                    .jpeg({ quality: 75, mozjpeg: true })
+                    .resize(384, 384, { fit: 'inside', withoutEnlargement: true })
+                    .jpeg({ quality: 65, mozjpeg: true })
                     .toBuffer()
                 envBase64 = processedEnvBuffer.toString('base64')
             } catch {

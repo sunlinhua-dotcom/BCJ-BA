@@ -398,24 +398,121 @@ herborist-app/
 
 ---
 
+### ✅ TASK-031 · Loading 页 Logo 放大 + 场景预览 Load failed 修复 + Prompt 禁止文字标注
+
+- **时间：** 2026-03-30
+- **Commit：** `61f912b fix: loading logo larger, Load failed fix (blob→img), prompt: whole peony+no text labels`
+- **需求来源：** 用户截图反馈三个问题
+- **修复内容：**
+
+#### Bug 1：Loading 页 Logo 太小
+
+- **文件：** `components/FortuneLoading.tsx`
+- **问题：** Logo容器 `w-16 h-8`（64×32px）在手机端远小于签文大字
+- **修复：** 放大至 `w-36 h-14`（144×56px）→ 后续TASK-032再次放大
+
+#### Bug 2：场景预览 "Load failed"
+
+- **文件：** `components/EnvironmentUploader.tsx`
+- **问题：** 使用 `next/image` 的 `<Image>` 组件加载 `URL.createObjectURL(file)` 返回的 blob URL → `next/image` 不支持 blob URL，直接报 Load failed
+- **修复：** 改为原生 `<img>` 标签（blob URL 必须用原生 img），加 `eslint-disable` 注释
+- **同时：** 移除多余的 `import Image from 'next/image'`
+
+#### Bug 3：AI 生成图中出现文字标注
+
+- **文件：** `lib/gemini.ts`（两处 Prompt）
+- **问题：** AI 在生成图中给每个仙草元素加了中文标注（"长白山人参"、"牡丹花瓣"等）
+- **修复：** 两处 Prompt 均加入：
+  ```
+  ⛔ ABSOLUTELY FORBIDDEN: Do NOT add ANY text, labels, annotations, captions, Chinese characters, or watermarks
+  ⛔ Do NOT label the herbs with their names
+  ```
+
+#### Bug 4：牡丹花瓣 → 整朵牡丹花
+
+- **文件：** `lib/gemini.ts`（两处 Prompt）
+- **修复：** `牡丹花瓣 (Peony petals) - scattered` → `整朵牡丹花 (Whole Peony flower, NOT petals) - full bloom, elegant placement`
+
+---
+
+### ✅ TASK-032 · Loading 页 Logo 二次放大 + 布局居中
+
+- **时间：** 2026-03-31
+- **Commit：** `7040b18 fix: loading logo 260px wide with fixed dimensions, reduce spacing for better centering`
+- **需求来源：** 用户截图反馈两个问题：1）Logo 偶尔消失 2）Logo 仍太小，需要占红框那么大
+- **修复内容：**
+
+#### 问题1：Logo 偶尔消失
+
+- **根因：** 使用 `fill` 模式 + `object-contain` 在小容器中可能渲染不出，且 `animate-float-slow` CSS 类未定义导致无动画效果
+- **修复：** 改为固定尺寸 `width={260} height={146}`，不依赖容器占位；动画改为已有的 `animate-pulse-slow`
+
+#### 问题2：Logo 仍太小 + 文字偏下
+
+- **修复：**
+  - Logo 容器从 `w-36 h-14` → 固定 `260×146px`（与签文大字视觉等大）
+  - 装饰线高度 `h-16` → `h-10`
+  - 间距统一 `mb-8/my-8/mt-8` → `mb-6/my-6/mt-6`
+  - 整体内容上移居中，不再偏下
+
+---
+
+### 🔄 TASK-033 · 生成速度优化 + 白色牡丹花
+
+- **时间：** 2026-04-01
+- **状态：** 代码已改完，待推送部署
+- **需求来源：** 用户反馈生成图片很慢；同时要求牡丹花改为白色
+
+#### 全链路瓶颈分析
+
+| 环节 | 优化前 | 优化后 | 预期提速 |
+|------|--------|--------|----------|
+| 前端上传 | 环境图原图直传（可能数MB） | 客户端 `compressImage()` 压缩至 768px/70% 再传 | 上传时间减少 60-80% |
+| Logo 处理 | Sharp 512px, quality 90 | 256px, quality 80 | base64 体积减半 |
+| 产品图处理 | Sharp 800×800, quality 95 | 512×512, quality 80 | base64 体积减 60% |
+| 环境图处理 | Sharp 512×512, quality 75 | 384×384, quality 65 | base64 体积减 40% |
+| 文案模型 | `gemini-3.1-pro-preview`（慢） | `gemini-3.1-flash-preview`（快 3-5x） | 文案生成提速 3-5 倍 |
+| 图文并行 | 已用 `Promise.all` | 不变 | — |
+
+#### 改动文件
+
+1. **`app/page.tsx`**
+   - import `compressImage` from `@/lib/client-compression`
+   - `handleGenerate` 中 envFile 上传前先客户端压缩
+
+2. **`app/api/generate/route.ts`**
+   - Logo: `resize(512)` → `resize(256)`，quality 90→80
+   - 产品: `resize(800,800)` → `resize(512,512)`，quality 95→80
+   - 环境: `resize(512,512)` → `resize(384,384)`，quality 75→65
+
+3. **`lib/gemini.ts`**
+   - `TEXT_MODEL` 默认值 `gemini-3.1-pro-preview` → `gemini-3.1-flash-preview`
+   - 两处牡丹花 Prompt：`整朵牡丹花` → `整朵白色牡丹花 (Whole WHITE Peony flower, NOT petals, NOT pink)`
+
+---
+
 ## 📋 待开发任务（BACKLOG）
 
-### 📋 TASK-031 · 兜底文案库填充
+### 📋 TASK-034 · 兜底文案库填充
+
 - **状态：** 待开发
 - **描述：** `app/data/copy_library.json` 当前所有文案数组为空，AI 失败时会显示极简兜底句
 - **计划：** 运行 `scripts/generate_copy_library.js` 批量生成，或人工填入各产品×各角色×各风格文案
 
-### 📋 TASK-032 · 历史记录页 UI 升级
+### 📋 TASK-035 · 历史记录页 UI 升级
+
 - **状态：** 待开发
 - **描述：** `/records` 页面目前是朴素 HTML table，与整体黑金东方风格不符
 - **计划：** 按整体设计系统重写，支持按角色/产品筛选，显示文案预览卡片
 
-### 📋 TASK-033 · 用户分享体验优化
+### 📋 TASK-036 · 用户分享体验优化
+
 - **状态：** 待开发
 - **描述：** 结果页「分享」功能依赖 Web Share API，部分 Android 浏览器不支持
 - **计划：** 加降级方案（复制链接 / 长按图片保存提示）
 
-### 📋 TASK-034 · 生产环境监控
+### 📋 TASK-037 · 生产环境监控
+
 - **状态：** 待开发
 - **描述：** 目前 Zeabur 仅靠 console.log，无报警机制
 - **计划：** 接入 Sentry 或 Zeabur 内置日志告警
@@ -429,10 +526,13 @@ herborist-app/
 | 1 | APIYI 水印 | ✅已过滤 | 正则 `/\(\d+\)/g` 过滤，但若水印格式变更需更新 |
 | 2 | 文案截断 | ✅已修复 | maxOutputTokens 4096 + 截断检测 |
 | 3 | KOC 标签传中文 | ✅已修复 | 前端做 id→label 映射 |
-| 4 | `/records` 页不显示 role | 🟡待优化 | RecordItem 接口缺 role 字段 |
-| 5 | copy_library.json 为空 | 📋待填充 | AI 失败时兜底文案太简陋 |
-| 6 | 产品图 jpg 源文件巨大 | 🟡可清理 | 4个 .jpg 各约30MB，仅用于本地，git忽略即可 |
+| 4 | Loading Logo 消失 | ✅已修复 | 改为固定尺寸渲染，不用 fill 模式 |
+| 5 | 场景预览 Load failed | ✅已修复 | blob URL 改用原生 img |
+| 6 | AI 图中文字标注 | ✅已修复 | Prompt 加 FORBIDDEN 规则 |
+| 7 | `/records` 页不显示 role | 🟡待优化 | RecordItem 接口缺 role 字段 |
+| 8 | copy_library.json 为空 | 📋待填充 | AI 失败时兜底文案太简陋 |
+| 9 | 产品图 jpg 源文件巨大 | 🟡可清理 | 4个 .jpg 各约30MB，仅用于本地，git忽略即可 |
 
 ---
 
-*日志由 Antigravity AI 辅助维护 · 最后更新 2026-03-30 16:04*
+*日志由 Antigravity AI 辅助维护 · 最后更新 2026-04-01 17:46*

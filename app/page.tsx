@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { PRODUCTS, UserRole } from '@/lib/constants'
+import { compressImage } from '@/lib/client-compression'
 import Header from '@/components/Header'
 import FortuneLoading from '@/components/FortuneLoading'
 import RoleSelector from '@/components/RoleSelector'
@@ -146,7 +147,11 @@ export default function HomePage() {
             const formData = new FormData()
             formData.append('productId', selectedProduct!)
             formData.append('role', role!)
-            if (envFile) formData.append('envFile', envFile)
+            // 客户端压缩环境图再上传（减少传输体积 + API处理时间）
+            if (envFile) {
+                const compressed = await compressImage(envFile, 768, 0.7)
+                formData.append('envFile', compressed)
+            }
 
             // KOC 精准标签 - 传中文 label 给 AI（而非英文 id）
             if (role === 'KOC') {

@@ -9,7 +9,7 @@ import path from 'path'
 const API_KEY = process.env.GEMINI_API_KEY || 'sk-hUMNGKLJnZJERuBH9c6bBc14A4E145D993318583Db7f8fE9'
 const TEXT_API_KEY = process.env.TEXT_API_KEY || 'sk-ceYYSJQE98KNX7tl4f364a604eB741B28d4bCe1396A878Fb'
 const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-3.1-flash-image-preview'
-const TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-3.1-pro-preview'
+const TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-3.1-flash-preview'
 const BASE_URL = process.env.GEMINI_BASE_URL || 'https://api.apiyi.com/v1beta'
 
 // ─── 随机辅助 ────────────────────────────────────────────────────────────────
@@ -113,7 +113,7 @@ STEP 4: FIVE SACRED HERBS
 Place naturally ON THE SURFACE around the product:
 - 长白山人参 (Ginseng root) - left side
 - 灵芝 (Lingzhi mushroom) - right side
-- 整朵牡丹花 (Whole Peony flower, NOT petals) - full bloom, elegant placement
+- 整朵白色牡丹花 (Whole WHITE Peony flower, NOT petals, NOT pink) - full bloom, elegant placement
 - 紫苏叶 (Perilla leaves) - near product
 - 北五味子 (Schisandra berries) - small cluster
 
@@ -162,7 +162,7 @@ STEP 2: PLACE THE EXACT PRODUCT
 STEP 3: FIVE SACRED HERBS
 - 长白山人参 (Ginseng root)
 - 灵芝 (Lingzhi mushroom)
-- 整朵牡丹花 (Whole Peony flower, NOT petals, full bloom)
+- 整朵白色牡丹花 (Whole WHITE Peony flower, NOT petals, NOT pink, full bloom)
 - 紫苏叶 (Perilla leaves)
 - 北五味子 (Schisandra berries)
 Each: fresh, realistic, casting natural shadows.

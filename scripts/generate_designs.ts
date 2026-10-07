@@ -3,7 +3,8 @@ import fs from 'fs';
 import path from 'path';
 
 // 配置 (复用 lib/gemini.ts 的配置)
-const API_KEY = '***REMOVED***';
+const API_KEY = process.env.GEMINI_API_KEY;
+if (!API_KEY) throw new Error('GEMINI_API_KEY is not set');
 const BASE_URL = 'https://api.apiyi.com/v1beta';
 const IMAGE_MODEL = 'gemini-3-pro-image-preview';
 

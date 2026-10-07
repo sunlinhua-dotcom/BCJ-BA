@@ -6,8 +6,8 @@ import path from 'path'
  * 支持 BA / KOC 双角色文案生成
  */
 
-const API_KEY = process.env.GEMINI_API_KEY || '***REMOVED***'
-const TEXT_API_KEY = process.env.TEXT_API_KEY || '***REMOVED***'
+const API_KEY = process.env.GEMINI_API_KEY
+const TEXT_API_KEY = process.env.TEXT_API_KEY
 const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-3.1-flash-image-preview'
 const TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-3.1-flash-preview'
 const BASE_URL = process.env.GEMINI_BASE_URL || 'https://api.apiyi.com/v1beta'

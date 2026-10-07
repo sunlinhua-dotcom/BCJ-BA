@@ -7,8 +7,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const API_KEY     = process.env.GEMINI_API_KEY  || '***REMOVED***';
-const TEXT_KEY    = process.env.TEXT_API_KEY    || '***REMOVED***';
+const API_KEY     = process.env.GEMINI_API_KEY;
+const TEXT_KEY    = process.env.TEXT_API_KEY;
 const BASE_URL    = 'https://api.apiyi.com/v1beta';
 const TEXT_MODEL  = 'gemini-3.1-pro-preview';
 const IMAGE_MODEL = 'gemini-3.1-flash-image-preview';
